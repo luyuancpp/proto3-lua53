@@ -1,8 +1,8 @@
 SRC=pb.c
 
 TARGET=pb.so
-CFLAGS=`pkg-config --cflags lua5.1` -std=gnu99
-LDFLAGS=`pkg-config --libs lua5.1`
+CFLAGS=-I/usr/local/include -std=gnu11
+LDFLAGS=-L/usr/local/lib
 
 all:$(TARGET)
 

@@ -48,6 +48,11 @@ typedef struct{
     char buf[IOSTRING_BUF_LEN];
 } IOString;
 
+#define luaL_reg luaL_Reg
+#undef luaL_register
+#define luaL_register(L,n,f) \
+	{ if ((n) == NULL) luaL_setfuncs(L,f,0); else luaL_newlib(L,f); }
+
 static void pack_varint(luaL_Buffer *b, uint64_t value)
 {
     if (value >= 0x80)
