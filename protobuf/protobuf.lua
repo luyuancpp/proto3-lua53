@@ -16,6 +16,11 @@
 --------------------------------------------------------------------------------
 --
 
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
+
+
 local setmetatable = setmetatable
 local rawset = rawset
 local rawget = rawget
@@ -28,6 +33,7 @@ local string = string
 local tostring = tostring
 local type = type
 
+
 local pb = require "pb"
 local wire_format = require "wire_format"
 local type_checkers = require "type_checkers"
@@ -39,7 +45,10 @@ local descriptor = require "descriptor"
 local FieldDescriptor = descriptor.FieldDescriptor
 local text_format = require "text_format"
 
-module("protobuf")
+local base = _ENV
+local protobuf = {}
+local _ENV = protobuf
+
 
 local function make_descriptor(name, descriptor, usable_key)
     local meta = {
@@ -56,7 +65,7 @@ local function make_descriptor(name, descriptor, usable_key)
         return setmetatable({}, meta)
     end
 
-    _M[name] = setmetatable(descriptor, meta);
+    protobuf[name] = setmetatable(descriptor, meta);
 end
 
 
@@ -918,5 +927,6 @@ local function Message(descriptor)
     return ns 
 end
 
-_M.Message = Message
+protobuf.Message = Message
 
+return protobuf

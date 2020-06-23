@@ -15,8 +15,14 @@
 --------------------------------------------------------------------------------
 --
 
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
 local pb = require "pb"
-module "wire_format"
+
+local base = _ENV
+local wire_format = {}
+local _ENV = wire_format
 
 WIRETYPE_VARINT = 0
 WIRETYPE_FIXED64 = 1
@@ -134,4 +140,4 @@ end
 function TagByteSize(field_number)
     return _VarUInt64ByteSizeNoTag(PackTag(field_number, 0))
 end
-
+return wire_format

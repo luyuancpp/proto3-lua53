@@ -15,6 +15,10 @@
 --  CREATED:  2010年07月29日 19时30分46秒 CST
 --------------------------------------------------------------------------------
 --
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
+
 local string = string
 local table = table
 local ipairs = ipairs
@@ -22,7 +26,11 @@ local assert =assert
 
 local pb = require "pb"
 local wire_format = require "wire_format"
-module "encoder"
+
+local base = _ENV
+local encoder = {}
+local _ENV = encoder
+
 
 function _VarintSize(value)
     if value <= 0x7f then return 1 end
@@ -459,3 +467,4 @@ function MessageEncoder(field_number, is_repeated, is_packed)
     end
 end
 
+return encoder

@@ -15,6 +15,10 @@
 --  CREATED:  2010年07月29日 19时30分51秒 CST
 --------------------------------------------------------------------------------
 --
+
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
 local string = string
 local table = table
 local assert = assert
@@ -25,7 +29,10 @@ local print = print
 local pb = require "pb"
 local encoder = require "encoder"
 local wire_format = require "wire_format"
-module "decoder"
+
+local base = _ENV
+local decoder = {}
+local _ENV = decoder
 
 local _DecodeVarint = pb.varint_decoder
 local _DecodeSignedVarint = pb.signed_varint_decoder
@@ -335,3 +342,5 @@ function _FieldSkipper()
 end
 
 SkipField = _FieldSkipper()
+
+return decoder

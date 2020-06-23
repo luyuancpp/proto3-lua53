@@ -15,8 +15,13 @@
 --  CREATED:  2010年08月11日 18时45分43秒 CST
 --------------------------------------------------------------------------------
 --
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
 
-module "descriptor"
+local base = _ENV
+local descriptor = {}
+local _ENV = descriptor
+
 
 FieldDescriptor = {
     TYPE_DOUBLE         = 1,
@@ -62,3 +67,4 @@ FieldDescriptor = {
     LABEL_REPEATED      = 3,
     MAX_LABEL           = 3
 }
+return descriptor

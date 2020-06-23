@@ -15,9 +15,14 @@
 --  CREATED:  2010年08月02日 17时35分25秒 CST
 --------------------------------------------------------------------------------
 --
+
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
 local setmetatable = setmetatable
 
-module "listener"
+local listener = {}
+local _ENV = listener
 
 local _null_listener = {
     Modified = function()
@@ -47,4 +52,4 @@ function Listener(parent_message)
     o.dirty = false
     return setmetatable(o, _listener_meta)
 end
-
+return listener

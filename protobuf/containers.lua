@@ -15,12 +15,18 @@
 --  CREATED:  2010年08月02日 16时15分42秒 CST
 --------------------------------------------------------------------------------
 --
+
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
 local setmetatable = setmetatable
 local table = table
 local rawset = rawset
 local error = error
 
-module "containers"
+local base = _ENV
+local containers = {}
+local _ENV = containers
 
 local _RCFC_meta = {
     add = function(self)
@@ -75,4 +81,4 @@ function RepeatedScalarFieldContainer(listener, type_checker)
     return setmetatable(o, _RSFC_meta)
 end
 
-
+return containers

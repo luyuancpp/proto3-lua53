@@ -14,6 +14,10 @@
 --  CREATED:  2010年08月05日 15时14分13秒 CST
 --------------------------------------------------------------------------------
 --
+
+package.path = package.path .. ';../protobuf/?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
+
 local string = string
 local math = math
 local print = print
@@ -24,7 +28,8 @@ local tostring = tostring
 
 local descriptor = require "descriptor"
 
-module "text_format"
+local text_format = {}
+local _ENV = text_format
 
 function format(buffer)
     local len = string.len( buffer )	
@@ -77,3 +82,4 @@ function msg_format(msg)
     return table.concat(out)
 end
 
+return text_format
