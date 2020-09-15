@@ -23,6 +23,8 @@ local setmetatable = setmetatable
 local table = table
 local rawset = rawset
 local error = error
+local print = print
+local type = type
 
 local base = _ENV
 local containers = {}
@@ -37,12 +39,36 @@ local _RCFC_meta = {
         if listener.dirty == false then
             listener:Modified()
         end
+        self.value_type = type(value)
         return value
     end,
     remove = function(self, key)
         local listener = self._listener
         table.remove(self, key)
         listener:Modified()
+    end,
+    insert = function(self, key, value)
+        local listener = self._listener
+        rawset(self, key, value)
+        if type(value) == "table" then
+             value:_SetListener(listener)
+        end
+        self.is_map = true
+        if self.key_type ~= "" then
+            if self.key_type ~= type(key) then
+               error("map key type error")
+            end
+            if self.value_type ~= type(value) then
+               error("map value type error")
+            end
+        else
+           self.key_type = type(key)
+           self.value_type = type(value)
+        end
+        if listener.dirty == false then
+            listener:Modified()
+        end
+        return value
     end,
     __newindex = function(self, key, value)
         error("RepeatedCompositeFieldContainer Can't set value directly")
@@ -53,7 +79,10 @@ _RCFC_meta.__index = _RCFC_meta
 function RepeatedCompositeFieldContainer(listener, message_descriptor)
     local o = {
         _listener = listener,
-        _message_descriptor = message_descriptor
+        _message_descriptor = message_descriptor,
+        is_map = false,
+        key_type = "",  
+        value_type = "",  
     }
     return setmetatable(o, _RCFC_meta)
 end
