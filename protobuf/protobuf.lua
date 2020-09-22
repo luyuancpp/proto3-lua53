@@ -337,7 +337,8 @@ local function _AttachFieldHelpers(message_meta, field_descriptor)
   
     AddDecoder(FIELD_TYPE_TO_WIRE_TYPE[field_descriptor.type], False)
     if is_repeated and IsTypePackable(field_descriptor.type) then
-        AddDecoder(wire_format.WIRETYPE_LENGTH_DELIMITED, True) end
+        AddDecoder(wire_format.WIRETYPE_LENGTH_DELIMITED, True)
+    end
 end
 
 local function _AttachMapFieldHelpers(message_meta, field_descriptor)
