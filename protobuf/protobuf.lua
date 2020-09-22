@@ -340,7 +340,7 @@ end
 local function _AttachFieldHelpers(message_meta, field_descriptor)
     local is_repeated = (field_descriptor.label == FieldDescriptor.LABEL_REPEATED)
     local is_packed = (field_descriptor.has_options and field_descriptor.GetOptions().packed)
-    local is_map = _AddMapProperties(field);
+    local is_map = _AddMapProperties(field_descriptor);
 
     rawset(field_descriptor, "_encoder", TYPE_TO_ENCODER[field_descriptor.type](field_descriptor.number, is_repeated, is_packed))
     rawset(field_descriptor, "_sizer", TYPE_TO_SIZER[field_descriptor.type](field_descriptor.number, is_repeated, is_packed))
