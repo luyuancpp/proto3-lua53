@@ -261,19 +261,29 @@ local FIELD_TYPE_TO_WIRE_TYPE = {
     [FieldDescriptor.TYPE_SINT64] = wire_format.WIRETYPE_VARINT
 }
 
-local function _AddMapEntry(message_descriptor, message_meta)
+local function IsMapType(message_descriptor)
     if nil == message_descriptor then
-        return
+        return false
     end
-    for _, field in ipairs(message_descriptor.fields) do
-        if field.name == "key" then
+    if nil == message_descriptor.message_type then
+        return false
+    end
+    if nil == message_descriptor.message_type.fields then
+        return false
+    end
+    local is_map = false
+    for k, v in ipairs(message_descriptor.message_type.fields) do
+        if v.name == "key" then  
             rawset(message_descriptor, "is_map", true)
-            rawset(message_descriptor, "key_type", field.cpp_type)
-        elseif field.name == "value"  then
+            rawset(message_descriptor, "key_type", v.cpp_type)
+            is_map = true
+        elseif v.name == "value"  then
             rawset(message_descriptor, "is_map", true)
-            rawset(message_descriptor, "value_type", field.cpp_type)
+            rawset(message_descriptor, "value_type", v.cpp_type)
+            is_map = true
         end
     end
+    return is_map 
 end
 
 local function IsTypePackable(field_type)
@@ -288,16 +298,17 @@ local function GetTypeChecker(cpp_type, field_type)
 end
 
 local function _DefaultValueConstructorForField(field , message_meta)
+    local is_map = IsMapType(field);
     if field.label == FieldDescriptor.LABEL_REPEATED then
         if type(field.default_value) ~= "table" or #(field.default_value) ~= 0  then
             error('Repeated field default value not empty list:' .. tostring(field.default_value))
         end
         if field.cpp_type == FieldDescriptor.CPPTYPE_MESSAGE then
             local message_type = field.message_type
-            rawset(message_type,"is_map", field["is_map"]) 
+            rawset(message_type,"is_map", is_map) 
             rawset(message_type,"key_type", field["key_type"]) 
             rawset(message_type,"value_type", field["value_type"]) 
-            if field["is_map"] == true then
+            if is_map == true then
                 return function (message)
                     return containers.RepeatedMapCompositeFieldContainer(message._listener_for_children, message_type)
                 end
@@ -343,16 +354,6 @@ local function _AttachFieldHelpers(message_meta, field_descriptor)
     if is_repeated and IsTypePackable(field_descriptor.type) then
         AddDecoder(wire_format.WIRETYPE_LENGTH_DELIMITED, True)
     end
-end
-
-local function _AttachMapFieldHelpers(message_meta, field_descriptor)
-   if field_descriptor["is_map"] == nil or  field_descriptor["is_map"] == false then
-       return
-   end
-    local is_repeated = (field_descriptor.label == FieldDescriptor.LABEL_REPEATED)
-    local is_packed = (field_descriptor.has_options and field_descriptor.GetOptions().packed)
-
-    rawset(field_descriptor, "_default_constructor", _DefaultValueConstructorForField(field_descriptor, message_meta))
 end
 
 local function _AddEnumValues(descriptor, message_meta)
@@ -494,7 +495,6 @@ local function _AddPropertiesForFields(descriptor, message_meta)
     if descriptor.is_extendable then
         message_meta._getter.Extensions = function(self) return _ExtensionDict(self) end
     end
-    _AddMapEntry(descriptor, message_meta)
 end
 
 local function _AddPropertiesForExtensions(descriptor, message_meta)
@@ -954,8 +954,6 @@ local function Message(descriptor)
     _AddMessageMethods(descriptor, message_meta)
     _AddPrivateHelperMethods(message_meta)
 
-    --reset map field
-    _AttachMapFieldHelpers(message_meta, descriptor)
     message_meta.__index = property_getter(message_meta)
     message_meta.__newindex = property_setter(message_meta) 
 
