@@ -299,9 +299,16 @@ local function _DefaultValueConstructorForField(field , message_meta)
             rawset(message_type,"is_map", field["is_map"]) 
             rawset(message_type,"key_type", field["key_type"]) 
             rawset(message_type,"value_type", field["value_type"]) 
-            return function (message)
-                return containers.RepeatedCompositeFieldContainer(message._listener_for_children, message_type)
+            if field["is_map"] == true then
+                return function (message)
+                    return containers.RepeatedMapCompositeFieldContainer(message._listener_for_children, message_type)
+                end
+             else
+                return function (message)
+                    return containers.RepeatedCompositeFieldContainer(message._listener_for_children, message_type)
+                end
             end
+            
         else
             local type_checker = GetTypeChecker(field.cpp_type, field.type)
             return function (message)

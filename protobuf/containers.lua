@@ -62,12 +62,7 @@ local function _IsSameCppType(map_field_type, param )
 
 local _RCFC_meta = {
     add = function(self)
-
         local value = self._message_descriptor._concrete_class()
-        if self.is_map then
-            return nil 
-        end
-
         local listener = self._listener
         rawset(self, #self + 1, value)
         value:_SetListener(listener)
@@ -81,23 +76,6 @@ local _RCFC_meta = {
         table.remove(self, key)
         listener:Modified()
     end,
-    insert = function(self, key, value)
-        if not _IsSameCppType(self.key_type, key) then
-               error("map key type error")
-        end
-        if not _IsSameCppType(self.value_type, value) then
-               error("map value type error")
-        end
-        local listener = self._listener
-        rawset(self, key, value)
-        if type(value) == "table" then
-             value:_SetListener(listener)
-        end
-        if listener.dirty == false then
-            listener:Modified()
-        end
-        return value
-    end,
     __newindex = function(self, key, value)
         error("RepeatedCompositeFieldContainer Can't set value directly")
     end
@@ -107,10 +85,7 @@ _RCFC_meta.__index = _RCFC_meta
 function RepeatedCompositeFieldContainer(listener, message_descriptor)
     local o = {
         _listener = listener,
-        _message_descriptor = message_descriptor,
-        is_map = message_descriptor["is_map"],
-        key_type = message_descriptor["key_type"],  
-        value_type = message_descriptor["value_type"]  
+        _message_descriptor = message_descriptor
     }
     return setmetatable(o, _RCFC_meta)
 end
@@ -137,5 +112,46 @@ function RepeatedScalarFieldContainer(listener, type_checker)
     o._type_checker = type_checker
     return setmetatable(o, _RSFC_meta)
 end
+
+local _RMFC_meta = {
+    remove = function(self, key)
+        local listener = self._listener
+        table.remove(self, key)
+        listener:Modified()
+    end,
+    insert = function(self, key, value)
+        if not _IsSameCppType(self.key_type, key) then
+               error("map key type error")
+        end
+        if not _IsSameCppType(self.value_type, value) then
+               error("map value type error")
+        end
+        local listener = self._listener
+        rawset(self, key, value)
+        if type(value) == "table" then
+             value:_SetListener(listener)
+        end
+        if listener.dirty == false then
+            listener:Modified()
+        end
+        return value
+    end,
+    __newindex = function(self, key, value)
+        error("RepeatedCompositeFieldContainer Can't set value directly")
+    end
+}
+_RMFC_meta.__index = _RMFC_meta
+
+function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
+    local o = {
+        _listener = listener,
+        _message_descriptor = message_descriptor,
+        is_map = message_descriptor["is_map"],
+        key_type = message_descriptor["key_type"],  
+        value_type = message_descriptor["value_type"]  
+    }
+    return setmetatable(o, _RMFC_meta)
+end
+
 
 return containers
