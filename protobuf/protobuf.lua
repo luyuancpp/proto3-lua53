@@ -263,6 +263,21 @@ local FIELD_TYPE_TO_WIRE_TYPE = {
     [FieldDescriptor.TYPE_SINT64] = wire_format.WIRETYPE_VARINT
 }
 
+local function _AddMapEntry(message_descriptor, message_meta)
+    if nil == message_descriptor then
+        return
+    end
+    for _, field in ipairs(message_descriptor.fields) do
+        if field.name == "key" then
+            rawset(message_descriptor, "is_map", true)
+            rawset(message_descriptor, "key_type", field.cpp_type)
+        elseif field.name == "value"  then
+            rawset(message_descriptor, "is_map", true)
+            rawset(message_descriptor, "value_type", field.cpp_type)
+        end
+    end
+end
+
 local function IsTypePackable(field_type)
     return NON_PACKABLE_TYPES[field_type] == nil
 end
@@ -274,13 +289,16 @@ local function GetTypeChecker(cpp_type, field_type)
     return _VALUE_CHECKERS[cpp_type]
 end
 
-local function _DefaultValueConstructorForField(field)
+local function _DefaultValueConstructorForField(field , message_meta)
     if field.label == FieldDescriptor.LABEL_REPEATED then
         if type(field.default_value) ~= "table" or #(field.default_value) ~= 0  then
             error('Repeated field default value not empty list:' .. tostring(field.default_value))
         end
         if field.cpp_type == FieldDescriptor.CPPTYPE_MESSAGE then
             local message_type = field.message_type
+            rawset(message_type,"is_map", field["is_map"]) 
+            rawset(message_type,"key_type", field["key_type"]) 
+            rawset(message_type,"value_type", field["value_type"]) 
             return function (message)
                 return containers.RepeatedCompositeFieldContainer(message._listener_for_children, message_type)
             end
@@ -310,7 +328,7 @@ local function _AttachFieldHelpers(message_meta, field_descriptor)
 
     rawset(field_descriptor, "_encoder", TYPE_TO_ENCODER[field_descriptor.type](field_descriptor.number, is_repeated, is_packed))
     rawset(field_descriptor, "_sizer", TYPE_TO_SIZER[field_descriptor.type](field_descriptor.number, is_repeated, is_packed))
-    rawset(field_descriptor, "_default_constructor", _DefaultValueConstructorForField(field_descriptor))
+    rawset(field_descriptor, "_default_constructor", _DefaultValueConstructorForField(field_descriptor, message_meta))
 
     local AddDecoder = function(wiretype, is_packed)
         local tag_bytes = encoder.TagBytes(field_descriptor.number, wiretype)
@@ -319,8 +337,17 @@ local function _AttachFieldHelpers(message_meta, field_descriptor)
   
     AddDecoder(FIELD_TYPE_TO_WIRE_TYPE[field_descriptor.type], False)
     if is_repeated and IsTypePackable(field_descriptor.type) then
-        AddDecoder(wire_format.WIRETYPE_LENGTH_DELIMITED, True)
-    end
+        AddDecoder(wire_format.WIRETYPE_LENGTH_DELIMITED, True) end
+end
+
+local function _AttachMapFieldHelpers(message_meta, field_descriptor)
+   if field_descriptor["is_map"] == nil or  field_descriptor["is_map"] == false then
+       return
+   end
+    local is_repeated = (field_descriptor.label == FieldDescriptor.LABEL_REPEATED)
+    local is_packed = (field_descriptor.has_options and field_descriptor.GetOptions().packed)
+
+    rawset(field_descriptor, "_default_constructor", _DefaultValueConstructorForField(field_descriptor, message_meta))
 end
 
 local function _AddEnumValues(descriptor, message_meta)
@@ -462,6 +489,7 @@ local function _AddPropertiesForFields(descriptor, message_meta)
     if descriptor.is_extendable then
         message_meta._getter.Extensions = function(self) return _ExtensionDict(self) end
     end
+    _AddMapEntry(descriptor, message_meta)
 end
 
 local function _AddPropertiesForExtensions(descriptor, message_meta)
@@ -920,6 +948,9 @@ local function Message(descriptor)
     _AddStaticMethods(message_meta)
     _AddMessageMethods(descriptor, message_meta)
     _AddPrivateHelperMethods(message_meta)
+
+    --reset map field
+    _AttachMapFieldHelpers(message_meta, descriptor)
 
     message_meta.__index = property_getter(message_meta)
     message_meta.__newindex = property_setter(message_meta) 
