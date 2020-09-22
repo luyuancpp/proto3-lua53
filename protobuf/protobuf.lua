@@ -33,7 +33,6 @@ local string = string
 local tostring = tostring
 local type = type
 
-
 local pb = require "pb"
 local wire_format = require "wire_format"
 local type_checkers = require "type_checkers"
@@ -48,7 +47,6 @@ local text_format = require "text_format"
 local base = _ENV
 local protobuf = {}
 local _ENV = protobuf
-
 
 local function make_descriptor(name, descriptor, usable_key)
     local meta = {
@@ -308,7 +306,6 @@ local function _DefaultValueConstructorForField(field , message_meta)
                     return containers.RepeatedCompositeFieldContainer(message._listener_for_children, message_type)
                 end
             end
-            
         else
             local type_checker = GetTypeChecker(field.cpp_type, field.type)
             return function (message)
@@ -959,7 +956,6 @@ local function Message(descriptor)
 
     --reset map field
     _AttachMapFieldHelpers(message_meta, descriptor)
-
     message_meta.__index = property_getter(message_meta)
     message_meta.__newindex = property_setter(message_meta) 
 
