@@ -239,30 +239,58 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 
     assert(not is_packed)
     if is_repeated then
-        local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-        local tag_len = #tag_bytes
-        return function (buffer, pos, pend, message, field_dict)
-            local value = field_dict[key]
-            if value == nil then
-                value = new_default(message)
-                field_dict[key] = value
-            end
-            while 1 do
-                local size, new_pos
-                size, pos = DecodeVarint(buffer, pos)
-                new_pos = pos + size
-                if new_pos > pend then
-                    error('Truncated message.')
-                end
-                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
-                    error('Unexpected end-group tag.')
-                end
-                pos = new_pos + tag_len
-                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
-                    return new_pos
-                end
-            end
-        end
+    	if is_map == true then
+    		local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
+	        local tag_len = #tag_bytes
+	        return function (buffer, pos, pend, message, field_dict)
+	            local value = field_dict[key]
+	            if value == nil then
+	                value = new_default(message)
+	                field_dict[key] = value
+	            end
+	            while 1 do
+	                local size, new_pos
+	                size, pos = DecodeVarint(buffer, pos)
+	                new_pos = pos + size
+	                if new_pos > pend then
+	                    error('Truncated message.')
+	                end
+	                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
+	                    error('Unexpected end-group tag.')
+	                end
+	                pos = new_pos + tag_len
+	                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
+	                    return new_pos
+	                end
+	            end
+	        end
+    	else
+    		local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
+	        local tag_len = #tag_bytes
+	        return function (buffer, pos, pend, message, field_dict)
+	            local value = field_dict[key]
+	            if value == nil then
+	                value = new_default(message)
+	                field_dict[key] = value
+	            end
+	            while 1 do
+	                local size, new_pos
+	                size, pos = DecodeVarint(buffer, pos)
+	                new_pos = pos + size
+	                if new_pos > pend then
+	                    error('Truncated message.')
+	                end
+	                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
+	                    error('Unexpected end-group tag.')
+	                end
+	                pos = new_pos + tag_len
+	                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
+	                    return new_pos
+	                end
+	            end
+	        end
+    	end
+	        
     else
         return function (buffer, pos, pend, message, field_dict)
             local value = field_dict[key]
