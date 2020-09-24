@@ -235,6 +235,7 @@ end
 function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
     local DecodeVarint = _DecodeVarint
     local sub = string.sub
+    local is_map = key["is_map"]
 
     assert(not is_packed)
     if is_repeated then
