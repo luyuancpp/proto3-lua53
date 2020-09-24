@@ -140,6 +140,7 @@ local _RMFC_meta = {
         error("RepeatedCompositeFieldContainer Can't set value directly")
     end
 }
+
 _RMFC_meta.__index = _RMFC_meta
 
 function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
@@ -152,6 +153,5 @@ function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
     }
     return setmetatable(o, _RMFC_meta)
 end
-
 
 return containers

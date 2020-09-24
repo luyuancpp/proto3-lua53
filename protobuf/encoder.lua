@@ -23,6 +23,7 @@ local string = string
 local table = table
 local ipairs = ipairs
 local assert =assert
+local print = print
 
 local pb = require "pb"
 local wire_format = require "wire_format"
