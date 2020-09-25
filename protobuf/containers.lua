@@ -113,53 +113,56 @@ function RepeatedScalarFieldContainer(listener, type_checker)
     return setmetatable(o, _RSFC_meta)
 end
 
-local _RMFC_meta = {
-    remove = function(self, key)
-        if nil == self[key] then
-            return 
-        end
-        local listener = self._listener
-        table.remove(self, key)
-        self._count = self._count - 1
-        listener:Modified()
-    end,
-    insert = function(self, key, value)
-        if not _IsSameCppType(self._key_type, key) then
-               error("map key type error")
-        end
-        if not _IsSameCppType(self._value_type, value) then
-               error("map value type error")
-        end
-        local listener = self._listener
-        if nil == self[key] then
-             rawset(self, key, value)
-             self._count = self._count + 1
-        end
-        if type(value) == "table" then
-             value:_SetListener(listener)
-        end
-        if listener.dirty == false then
-            listener:Modified()
-        end
-        return value
-    end,
-    __newindex = function(self, key, value)
-        error("RepeatedCompositeFieldContainer Can't set value directly")
-    end
-}
-
-_RMFC_meta.__index = _RMFC_meta
 
 function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
-    local o = {
+    mytable = setmetatable(
+        {
         _listener = listener,
         _message_descriptor = message_descriptor,
         _is_map = message_descriptor["is_map"],
         _key_type = message_descriptor["key_type"],  
         _value_type = message_descriptor["value_type"],
-        _count = 0
-    }
-    return setmetatable(o, _RMFC_meta)
+        _count = 0,
+        _data = {},
+        remove = function(self, key)
+            if nil == self._data[key] then
+               return 
+            end
+            local listener = self._listener
+            table.remove(self._data, key)
+            self._count = self._count - 1
+            listener:Modified()
+        end,
+        insert = function(self, key, value)
+            if not _IsSameCppType(self._key_type, key) then
+               error("map key type error")
+            end
+            if not _IsSameCppType(self._value_type, value) then
+               error("map value type error")
+            end
+            local listener = self._listener
+            if nil == self._data[key] then
+                rawset(self._data, key, value)
+                self._count = self._count + 1
+            end
+            if type(value) == "table" then
+                value:_SetListener(listener)
+            end
+            if listener.dirty == false then
+                listener:Modified()
+            end
+            return value
+       end,
+        __newindex = function(self, key, value)
+            error("RepeatedCompositeFieldContainer Can't set value directly")
+       end
+       },
+       {__index = function(mytable, key) 
+            return mytable._data[key] 
+       end
+       }
+    )
+    return mytable
 end
 
 return containers
