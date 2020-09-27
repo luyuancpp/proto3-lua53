@@ -28,6 +28,7 @@ local print = print
 
 local pb = require "pb"
 local wire_format = require "wire_format"
+local map_encoder = require "map_encoder"
 
 local base = _ENV
 local encoder = {}
@@ -217,13 +218,13 @@ function MessageSizer(field_number, is_repeated, is_packed)
                  local result = tag_size * value._count
                  for k,v in pairs(value._data) do
                      if value.is_scalar_key then
-                        result = result + VarintSize(k) 
+                        result = result + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
                      else 
                         local ks = k:ByteSize()
                         result = result + VarintSize(ks) + ks
                      end
                      if value.is_scalar_value then
-                        result = result + VarintSize(v) 
+                        result = result + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
                      else 
                         local vs = v:ByteSize()
                         result = result + VarintSize(vs) + vs

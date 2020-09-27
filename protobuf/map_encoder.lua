@@ -29,7 +29,8 @@ local print = print
 
 local pb = require "pb"
 local wire_format = require "wire_format"
-local encoder = require "encoder"
+local descriptor = require "descriptor"
+local FieldDescriptor = descriptor.FieldDescriptor
 
 local map_encoder = {}
 setmetatable(map_encoder,{__index = _G})
@@ -81,7 +82,6 @@ function _FixedMapElementSizer(value_size)
     end
 end
 
-
 Int32MapSizer = _SimpleMapElemetSizer(_MapSignedVarintSize)
 Int64MapSizer = Int32MapSizer
 EnumMapSizer = Int32MapSizer
@@ -92,7 +92,7 @@ UInt64MapSizer = UInt32MapSizer
 SInt32MapSizer = _ModifiedMapElementSizer(_MapSignedVarintSize, wire_format.ZigZagEncode)
 SInt64MapSizer = SInt32MapSizer
 
-Fixed32MapSizer = _FixedMapSizer(4) 
+Fixed32MapSizer = _FixedMapElementSizer(4) 
 SFixed32MapSizer = Fixed32MapSizer
 FloatMapSizer = Fixed32MapSizer
 
@@ -102,7 +102,7 @@ DoubleMapSizer = Fixed64MapSizer
 
 BoolMapSizer = _FixedMapElementSizer(1)
 
-local EN_CODER_TYPE_TO_MAP_SIZER = {
+EN_CODER_TYPE_TO_MAP_SIZER = {
     [FieldDescriptor.TYPE_DOUBLE] = DoubleMapSizer,
     [FieldDescriptor.TYPE_FLOAT] = FloatMapSizer,
     [FieldDescriptor.TYPE_INT64] = Int64MapSizer,
