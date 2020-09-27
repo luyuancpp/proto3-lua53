@@ -22,6 +22,7 @@ package.cpath = package.cpath .. ';../protobuf/?.so'
 local string = string
 local table = table
 local ipairs = ipairs
+local pairs = pairs
 local assert =assert
 local print = print
 
@@ -212,12 +213,31 @@ function MessageSizer(field_number, is_repeated, is_packed)
     assert(not is_packed)
     if is_repeated then
         return function(value)
-            local result = tag_size * #value
-            for _,element in ipairs(value) do
-                local l = element:ByteSize()
-                result = result + VarintSize(l) + l
+            if value._is_map then 
+                 local result = tag_size * value._count
+                 for k,v in pairs(value._data) do
+                     if value.is_scalar_key then
+                        result = result + VarintSize(k) 
+                     else 
+                        local ks = k:ByteSize()
+                        result = result + VarintSize(ks) + ks
+                     end
+                     if value.is_scalar_value then
+                        result = result + VarintSize(v) 
+                     else 
+                        local vs = v:ByteSize()
+                        result = result + VarintSize(vs) + vs
+                     end
+                 end
+                 return result
+            else 
+                 local result = tag_size * #value
+                 for _,element in ipairs(value) do
+                    local l = element:ByteSize()
+                    result = result + VarintSize(l) + l
+                end
+                return result
             end
-            return result
         end
     else
         return function (value)

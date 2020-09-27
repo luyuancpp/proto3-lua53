@@ -149,6 +149,12 @@ local _RMFC_meta = {
     data = function(self)
         return self._data
     end,
+    is_scalar_key = function(self)
+        return self._key_type ~= FieldDescriptor.CPPTYPE_MESSAGE
+    end,
+    is_scalar_value = function(self)
+        return self._value_type ~= FieldDescriptor.CPPTYPE_MESSAGE
+    end,
     __newindex = function(self, key, value)
         error("RepeatedCompositeFieldContainer Can't set value directly")
     end
