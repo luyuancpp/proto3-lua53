@@ -276,10 +276,12 @@ local function _AddMapProperties(message_descriptor)
         if v.name == "key" then  
             rawset(message_descriptor, "is_map", true)
             rawset(message_descriptor, "key_cpp_type", v.cpp_type)
+            rawset(message_descriptor, "key_type", v.type)
             is_map = true
         elseif v.name == "value"  then
             rawset(message_descriptor, "is_map", true)
             rawset(message_descriptor, "value_cpp_type", v.cpp_type)
+            rawset(message_descriptor, "value_type", v.type)
             is_map = true
         end
     end
@@ -308,6 +310,8 @@ local function _DefaultValueConstructorForField(field , message_meta)
             rawset(message_type,"is_map", field["is_map"]) 
             rawset(message_type,"key_cpp_type", field["key_cpp_type"]) 
             rawset(message_type,"value_cpp_type", field["value_cpp_type"]) 
+            rawset(message_type,"key_type", field["key_type"]) 
+            rawset(message_type,"value_type", field["value_type"]) 
             if field["is_map"] == true then
                 return function (message)
                     return containers.RepeatedMapCompositeFieldContainer(message._listener_for_children, message_type)
