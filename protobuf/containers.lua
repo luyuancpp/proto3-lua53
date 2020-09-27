@@ -119,7 +119,7 @@ local _RMFC_meta = {
             return 
         end
         local listener = self._listener
-        table.remove(self, key)
+        table.remove(self._data, key)
         self._count = self._count - 1
         listener:Modified()
     end,
@@ -131,8 +131,8 @@ local _RMFC_meta = {
                error("map value type error")
         end
         local listener = self._listener
-        if nil == self[key] then
-             rawset(self, key, value)
+        if nil == self._data[key] then
+             rawset(self._data, key, value)
              self._count = self._count + 1
         end
         if type(value) == "table" then
@@ -142,6 +142,12 @@ local _RMFC_meta = {
             listener:Modified()
         end
         return value
+    end,
+    get = function(self, key)
+        return self._data[key]
+    end,
+    data = function(self)
+        return self._data
     end,
     __newindex = function(self, key, value)
         error("RepeatedCompositeFieldContainer Can't set value directly")
@@ -157,7 +163,8 @@ function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
         _is_map = message_descriptor["is_map"],
         _key_type = message_descriptor["key_type"],  
         _value_type = message_descriptor["value_type"],
-        _count = 0
+        _count = 0,
+        _data = {}
     }
     return setmetatable(o, _RMFC_meta)
 end
