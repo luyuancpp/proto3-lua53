@@ -124,10 +124,10 @@ local _RMFC_meta = {
         listener:Modified()
     end,
     insert = function(self, key, value)
-        if not _IsSameCppType(self._key_type, key) then
+        if not _IsSameCppType(self._key_cpp_type, key) then
                error("map key type error")
         end
-        if not _IsSameCppType(self._value_type, value) then
+        if not _IsSameCppType(self._value_cpp_type, value) then
                error("map value type error")
         end
         local listener = self._listener
@@ -150,10 +150,10 @@ local _RMFC_meta = {
         return self._data
     end,
     is_scalar_key = function(self)
-        return self._key_type ~= FieldDescriptor.CPPTYPE_MESSAGE
+        return self._key_cpp_type ~= FieldDescriptor.CPPTYPE_MESSAGE
     end,
     is_scalar_value = function(self)
-        return self._value_type ~= FieldDescriptor.CPPTYPE_MESSAGE
+        return self._value_cpp_type ~= FieldDescriptor.CPPTYPE_MESSAGE
     end,
     __newindex = function(self, key, value)
         error("RepeatedCompositeFieldContainer Can't set value directly")
@@ -167,8 +167,8 @@ function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
         _listener = listener,
         _message_descriptor = message_descriptor,
         _is_map = message_descriptor["is_map"],
-        _key_type = message_descriptor["key_type"],  
-        _value_type = message_descriptor["value_type"],
+        _key_cpp_type = message_descriptor["key_cpp_type"],  
+        _value_cpp_type = message_descriptor["value_cpp_type"],
         _count = 0,
         _data = {}
     }
