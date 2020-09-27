@@ -35,6 +35,33 @@ local map_encoder = {}
 setmetatable(map_encoder,{__index = _G})
 local _ENV = map_encoder
 
+
+function _MapVarintSize(value)
+    if value <= 0x7f then return 1 end
+    if value <= 0x3fff then return 2 end
+    if value <= 0x1fffff then return 3 end
+    if value <= 0xfffffff then return 4 end
+    if value <= 0x7ffffffff then return 5 end
+    if value <= 0x3ffffffffff then return 6 end
+    if value <= 0x1ffffffffffff then return 7 end
+    if value <= 0xffffffffffffff then return 8 end
+    if value <= 0x7fffffffffffffff then return 9 end
+    return 10
+end
+
+function _MapSignedVarintSize(value)
+    if value < 0 then return 10 end
+    if value <= 0x7f then return 1 end
+    if value <= 0x3fff then return 2 end
+    if value <= 0x1fffff then return 3 end
+    if value <= 0xfffffff then return 4 end
+    if value <= 0x7ffffffff then return 5 end
+    if value <= 0x3ffffffffff then return 6 end
+    if value <= 0x1ffffffffffff then return 7 end
+    if value <= 0xffffffffffffff then return 8 end
+    if value <= 0x7fffffffffffffff then return 9 end
+    return 10
+end
 ------------------------ map element --------------------------
 function _SimpleMapElemetSizer(compute_value_size)
     return function(value)
@@ -55,14 +82,14 @@ function _FixedMapElementSizer(value_size)
 end
 
 
-Int32MapSizer = _SimpleMapElemetSizer(encoder._SignedVarintSize)
+Int32MapSizer = _SimpleMapElemetSizer(_MapSignedVarintSize)
 Int64MapSizer = Int32MapSizer
 EnumMapSizer = Int32MapSizer
 
-UInt32MapSizer = _SimpleMapElemetSizer(encoder._VarintSize)
+UInt32MapSizer = _SimpleMapElemetSizer(_MapVarintSize)
 UInt64MapSizer = UInt32MapSizer 
 
-SInt32MapSizer = _ModifiedMapElementSizer(encoder._SignedVarintSize, wire_format.ZigZagEncode)
+SInt32MapSizer = _ModifiedMapElementSizer(_MapSignedVarintSize, wire_format.ZigZagEncode)
 SInt64MapSizer = SInt32MapSizer
 
 Fixed32MapSizer = _FixedMapSizer(4) 
