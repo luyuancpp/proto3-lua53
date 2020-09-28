@@ -217,18 +217,18 @@ function MessageSizer(field_number, is_repeated, is_packed)
             if value._is_map then 
                  local result = tag_size * value._count
                  for k,v in pairs(value._data) do
+                     local inner_length = 2
                      if value.is_scalar_key then
-                        result = result + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
+                        inner_length = inner_length +  map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
                      else 
-                        local ks = k:ByteSize()
-                        result = result + VarintSize(ks) + ks
+                        inner_length = inner_length +  k:ByteSize()
                      end
                      if value.is_scalar_value then
-                        result = result + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
+                        inner_length = inner_length + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
                      else 
-                        local vs = v:ByteSize()
-                        result = result + VarintSize(vs) + vs
+                        inner_length = inner_length +  v:ByteSize()
                      end
+                     result = result + inner_length + VarintSize(inner_length)
                  end
                  return result
             else 
