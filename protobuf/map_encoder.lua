@@ -125,24 +125,24 @@ EN_CODER_TYPE_TO_MAP_SIZER = {
 
 
 local TYPE_TO_ENCODER = {
-    [FieldDescriptor.TYPE_DOUBLE] = encoder.DoubleMapEncoder,
-    [FieldDescriptor.TYPE_FLOAT] = encoder.FloatMapEncoder,
-    [FieldDescriptor.TYPE_INT64] = encoder.Int64MapEncoder,
-    [FieldDescriptor.TYPE_UINT64] = encoder.UInt64MapEncoder,
-    [FieldDescriptor.TYPE_INT32] = encoder.Int32MapEncoder,
-    [FieldDescriptor.TYPE_FIXED64] = encoder.Fixed64MapEncoder,
-    [FieldDescriptor.TYPE_FIXED32] = encoder.Fixed32MapEncoder,
-    [FieldDescriptor.TYPE_BOOL] = encoder.BoolEncoder,
-    [FieldDescriptor.TYPE_STRING] = encoder.StringEncoder,
-    [FieldDescriptor.TYPE_GROUP] = encoder.GroupEncoder,
-    [FieldDescriptor.TYPE_MESSAGE] = encoder.MessageEncoder,
-    [FieldDescriptor.TYPE_BYTES] = encoder.BytesEncoder,
-    [FieldDescriptor.TYPE_UINT32] = encoder.UInt32MapEncoder,
-    [FieldDescriptor.TYPE_ENUM] = encoder.EnumMapEncoder,
-    [FieldDescriptor.TYPE_SFIXED32] = encoder.SFixed32MapEncoder,
-    [FieldDescriptor.TYPE_SFIXED64] = encoder.SFixed64MapEncoder,
-    [FieldDescriptor.TYPE_SINT32] = encoder.SInt32MapEncoder,
-    [FieldDescriptor.TYPE_SINT64] = encoder.SInt64MapEncoder
+    [FieldDescriptor.TYPE_DOUBLE] = DoubleMapEncoder,
+    [FieldDescriptor.TYPE_FLOAT] = FloatMapEncoder,
+    [FieldDescriptor.TYPE_INT64] = Int64MapEncoder,
+    [FieldDescriptor.TYPE_UINT64] = UInt64MapEncoder,
+    [FieldDescriptor.TYPE_INT32] = Int32MapEncoder,
+    [FieldDescriptor.TYPE_FIXED64] = Fixed64MapEncoder,
+    [FieldDescriptor.TYPE_FIXED32] = Fixed32MapEncoder,
+    [FieldDescriptor.TYPE_BOOL] = BoolEncoder,
+    [FieldDescriptor.TYPE_STRING] = StringEncoder,
+    [FieldDescriptor.TYPE_GROUP] = GroupEncoder,
+    [FieldDescriptor.TYPE_MESSAGE] = MessageEncoder,
+    [FieldDescriptor.TYPE_BYTES] = BytesEncoder,
+    [FieldDescriptor.TYPE_UINT32] = UInt32MapEncoder,
+    [FieldDescriptor.TYPE_ENUM] = EnumMapEncoder,
+    [FieldDescriptor.TYPE_SFIXED32] = SFixed32MapEncoder,
+    [FieldDescriptor.TYPE_SFIXED64] = SFixed64MapEncoder,
+    [FieldDescriptor.TYPE_SINT32] = SInt32MapEncoder,
+    [FieldDescriptor.TYPE_SINT64] = SInt64MapEncoder
 }
 
 
