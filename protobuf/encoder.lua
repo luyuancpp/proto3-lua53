@@ -484,10 +484,39 @@ function MessageEncoder(field_number, is_repeated, is_packed)
     assert(not is_packed)
     if is_repeated then
         return function(write, value)
-            for _, element in ipairs(value) do
-                write(tag)
-                EncodeVarint(write, element:ByteSize())
-                element:_InternalSerialize(write)
+          if value._is_map then 
+                 for k,v in pairs(value._data) do
+                     write(tag)
+                     local inner_length = 2
+                     if value.is_scalar_key then
+                        inner_length = inner_length +  map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
+                     else 
+                        inner_length = inner_length +  k:ByteSize()
+                     end
+                     if value.is_scalar_value then
+                        inner_length = inner_length + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
+                     else 
+                        inner_length = inner_length +  v:ByteSize()
+                     end
+                     EncodeVarint(write, inner_length)
+                     if value.is_scalar_key then
+                        map_encoder.TYPE_TO_ENCODER[value:key_type()](k) 
+                     else 
+                        k:_InternalSerialize(write)
+                     end
+                     if value.is_scalar_value then
+                        map_encoder.TYPE_TO_ENCODER[value:value_type()](v) 
+                     else 
+                        v:_InternalSerialize(write)
+                     end
+                 end
+             
+            else 
+                for _, element in ipairs(value) do
+                    write(tag)
+                    EncodeVarint(write, element:ByteSize())
+                    element:_InternalSerialize(write)
+                end
             end
         end
     else
