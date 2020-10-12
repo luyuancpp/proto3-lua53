@@ -124,26 +124,6 @@ EN_CODER_TYPE_TO_MAP_SIZER = {
 }
 
 
-local TYPE_TO_ENCODER = {
-    [FieldDescriptor.TYPE_DOUBLE] = DoubleMapEncoder,
-    [FieldDescriptor.TYPE_FLOAT] = FloatMapEncoder,
-    [FieldDescriptor.TYPE_INT64] = Int64MapEncoder,
-    [FieldDescriptor.TYPE_UINT64] = UInt64MapEncoder,
-    [FieldDescriptor.TYPE_INT32] = Int32MapEncoder,
-    [FieldDescriptor.TYPE_FIXED64] = Fixed64MapEncoder,
-    [FieldDescriptor.TYPE_FIXED32] = Fixed32MapEncoder,
-    [FieldDescriptor.TYPE_BOOL] = BoolEncoder,
-    [FieldDescriptor.TYPE_STRING] = StringEncoder,
-    [FieldDescriptor.TYPE_GROUP] = GroupEncoder,
-    [FieldDescriptor.TYPE_MESSAGE] = MessageEncoder,
-    [FieldDescriptor.TYPE_BYTES] = BytesEncoder,
-    [FieldDescriptor.TYPE_UINT32] = UInt32MapEncoder,
-    [FieldDescriptor.TYPE_ENUM] = EnumMapEncoder,
-    [FieldDescriptor.TYPE_SFIXED32] = SFixed32MapEncoder,
-    [FieldDescriptor.TYPE_SFIXED64] = SFixed64MapEncoder,
-    [FieldDescriptor.TYPE_SINT32] = SInt32MapEncoder,
-    [FieldDescriptor.TYPE_SINT64] = SInt64MapEncoder
-}
 
 
 ------------------------ map element --------------------------
@@ -443,5 +423,26 @@ function MessageEncoder(field_number, is_repeated, is_packed)
         end
     end
 end
+
+TYPE_TO_MAP_ENCODER = {
+    [FieldDescriptor.TYPE_DOUBLE] = DoubleMapEncoder,
+    [FieldDescriptor.TYPE_FLOAT] = FloatMapEncoder,
+    [FieldDescriptor.TYPE_INT64] = Int64MapEncoder,
+    [FieldDescriptor.TYPE_UINT64] = UInt64MapEncoder,
+    [FieldDescriptor.TYPE_INT32] = Int32MapEncoder,
+    [FieldDescriptor.TYPE_FIXED64] = Fixed64MapEncoder,
+    [FieldDescriptor.TYPE_FIXED32] = Fixed32MapEncoder,
+    [FieldDescriptor.TYPE_BOOL] = BoolEncoder,
+    [FieldDescriptor.TYPE_STRING] = StringEncoder,
+    [FieldDescriptor.TYPE_GROUP] = GroupEncoder,
+    [FieldDescriptor.TYPE_MESSAGE] = MessageEncoder,
+    [FieldDescriptor.TYPE_BYTES] = BytesEncoder,
+    [FieldDescriptor.TYPE_UINT32] = UInt32MapEncoder,
+    [FieldDescriptor.TYPE_ENUM] = EnumMapEncoder,
+    [FieldDescriptor.TYPE_SFIXED32] = SFixed32MapEncoder,
+    [FieldDescriptor.TYPE_SFIXED64] = SFixed64MapEncoder,
+    [FieldDescriptor.TYPE_SINT32] = SInt32MapEncoder,
+    [FieldDescriptor.TYPE_SINT64] = SInt64MapEncoder
+}
 
 return map_encoder
