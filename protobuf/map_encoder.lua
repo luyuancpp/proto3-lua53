@@ -374,7 +374,7 @@ function BytesMapEncoder(field_number, is_repeated, is_packed)
 end
 
 
-function MessageEncoder(field_number, is_repeated, is_packed)
+function MessageMapEncoder(field_number, is_repeated, is_packed)
     local tag = TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
     local EncodeVarint = _EncodeVarint
     assert(not is_packed)
@@ -432,11 +432,11 @@ TYPE_TO_MAP_ENCODER = {
     [FieldDescriptor.TYPE_INT32] = Int32MapEncoder,
     [FieldDescriptor.TYPE_FIXED64] = Fixed64MapEncoder,
     [FieldDescriptor.TYPE_FIXED32] = Fixed32MapEncoder,
-    [FieldDescriptor.TYPE_BOOL] = BoolEncoder,
-    [FieldDescriptor.TYPE_STRING] = StringEncoder,
-    [FieldDescriptor.TYPE_GROUP] = GroupEncoder,
-    [FieldDescriptor.TYPE_MESSAGE] = MessageEncoder,
-    [FieldDescriptor.TYPE_BYTES] = BytesEncoder,
+    [FieldDescriptor.TYPE_BOOL] = BoolMapEncoder,
+    [FieldDescriptor.TYPE_STRING] = StringMapEncoder,
+    [FieldDescriptor.TYPE_GROUP] = GroupMapEncoder,
+    [FieldDescriptor.TYPE_MESSAGE] = MessageMapEncoder,
+    [FieldDescriptor.TYPE_BYTES] = BytesMapEncoder,
     [FieldDescriptor.TYPE_UINT32] = UInt32MapEncoder,
     [FieldDescriptor.TYPE_ENUM] = EnumMapEncoder,
     [FieldDescriptor.TYPE_SFIXED32] = SFixed32MapEncoder,
