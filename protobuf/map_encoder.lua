@@ -167,68 +167,20 @@ end
 
 function _SimpleMapEncoder(wire_type, encode_value, compute_value_size)
     return function(field_number, is_repeated, is_packed)
-        if is_packed then
-            local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-            local EncodeVarint = _EncodeVarint
-            return function(write, value)
-                write(tag_bytes)
-                local size = 0
-                for _, element in ipairs(value) do
-                    size = size + compute_value_size(element)
-                end
-                EncodeVarint(write, size)
-                for element in value do
-                    encode_value(write, element)
-                end
-            end
-        elseif is_repeated then
-            local tag_bytes = TagMapBytes(field_number, wire_type)
-            return function(write, value)
-                for _, element in ipairs(value) do
-                    write(tag_bytes)
-                    encode_value(write, element)
-                end
-            end
-        else
-            local tag_bytes = TagMapBytes(field_number, wire_type)
-            return function(write, value)
-                write(tag_bytes)
-                encode_value(write, value)
-            end
+        local tag_bytes = TagMapBytes(field_number, wire_type)
+        return function(write, value)
+            write(tag_bytes)
+            encode_value(write, value)
         end
     end
 end
 
 function _ModifiedMapEncoder(wire_type, encode_value, compute_value_size, modify_value)
     return function (field_number, is_repeated, is_packed)
-        if is_packed then
-            local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-            local EncodeVarint = _EncodeVarint
-            return function (write, value)
-                write(tag_bytes)
-                local size = 0
-                for _, element in ipairs(value) do
-                    size = size + compute_value_size(modify_value(element))
-                end
-                EncodeVarint(write, size)
-                for _, element in ipairs(value) do
-                    encode_value(write, modify_value(element))
-                end
-            end
-        elseif is_repeated then
-            local tag_bytes = TagMapBytes(field_number, wire_type)
-            return function (write, value)
-                for _, element in ipairs(value) do
-                    write(tag_bytes)
-                    encode_value(write, modify_value(element))
-                end
-            end
-        else
-            local tag_bytes = TagMapBytes(field_number, wire_type)
-            return function (write, value)
-                write(tag_bytes)
-                encode_value(write, modify_value(value))
-            end
+        local tag_bytes = TagMapBytes(field_number, wire_type)
+        return function (write, value)
+            write(tag_bytes)
+            encode_value(write, modify_value(value))
         end
     end
 end
@@ -236,32 +188,11 @@ end
 function _StructPackMapEncoder(wire_type, value_size, format)
     return function(field_number, is_repeated, is_packed)
         local struct_pack = pb.struct_pack
-        if is_packed then
-            local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-            local EncodeVarint = _EncodeVarint
-            return function (write, value)
-                write(tag_bytes)
-                EncodeVarint(write, #value * value_size)
-                for _, element in ipairs(value) do
-                    struct_pack(write, format, element)
-                end
-            end
-        elseif is_repeated then
-            local tag_bytes = TagMapBytes(field_number, wire_type)
-            return function (write, value)
-                for _, element in ipairs(value) do
-                    write(tag_bytes)
-                    struct_pack(write, format, element)
-                end
-            end
-        else
-            local tag_bytes = TagMapBytes(field_number, wire_type)
-            return function (write, value)
-                write(tag_bytes)
-                struct_pack(write, format, value)
-            end
+        local tag_bytes = TagMapBytes(field_number, wire_type)
+        return function (write, value)
+            write(tag_bytes)
+            struct_pack(write, format, value)
         end
-
     end
 end
 
@@ -291,85 +222,39 @@ DoubleMapEncoder   = _StructPackMapEncoder(wire_format.WIRETYPE_FIXED64, 8, stri
 function BoolMapEncoder(field_number, is_repeated, is_packed)
     local false_byte = '\0'
     local true_byte = '\1'
-    if is_packed then
-        local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-        local EncodeVarint = _EncodeVarint
-        return function (write, value)
-            write(tag_bytes)
-            EncodeVarint(write, #value)
-            for _, element in ipairs(value) do
-                if element then
-                    write(true_byte)
-                else
-                    write(false_byte)
-                end
-            end
+ 
+    local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_VARINT)
+    return function (write, value)
+        write(tag_bytes)
+        if value then
+            return write(true_byte)
         end
-    elseif is_repeated then
-        local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_VARINT)
-        return function(write, value)
-            for _, element in ipairs(value) do
-                write(tag_bytes)
-                if element then
-                    write(true_byte)
-                else
-                    write(false_byte)
-                end
-            end
-        end
-    else
-        local tag_bytes = TagMapBytes(field_number, wire_format.WIRETYPE_VARINT)
-        return function (write, value)
-            write(tag_bytes)
-            if value then
-                return write(true_byte)
-            end
-            return write(false_byte)
-        end
+        return write(false_byte)
     end
+
 end
 
 function StringMapEncoder(field_number, is_repeated, is_packed)
     local tag = TagMapBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
     local EncodeVarint = _EncodeVarint
-    assert(not is_packed)
-    if is_repeated then
-        return function (write, value)
-            for _, element in ipairs(value) do
---                encoded = element.encode('utf-8')
-                write(tag)
-                EncodeVarint(write, #element)
-                write(element)
-            end
-        end
-    else
-        return function (write, value)
+
+    return function (write, value)
 --            local encoded = value.encode('utf-8')
-            write(tag)
-            EncodeVarint(write, #value)
-            return write(value)
-        end
+        write(tag)
+        EncodeVarint(write, #value)
+        return write(value)
     end
+
 end
 
 function BytesMapEncoder(field_number, is_repeated, is_packed)
     local tag = TagMapBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
     local EncodeVarint = _EncodeVarint
     assert(not is_packed)
-    if is_repeated then
-        return function (write, value)
-            for _, element in ipairs(value) do
-                write(tag)
-                EncodeVarint(write, #element)
-                write(element)
-            end
-        end
-    else
-        return function(write, value)
-            write(tag)
-            EncodeVarint(write, #value)
-            return write(value)
-        end
+    return function(write, value)
+        write(tag)
+        EncodeVarint(write, #value)
+        return write(value)
     end
 end
 
@@ -378,50 +263,7 @@ function MessageMapEncoder(field_number, is_repeated, is_packed)
     local tag = TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
     local EncodeVarint = _EncodeVarint
     assert(not is_packed)
-    if is_repeated then
-        return function(write, value)
-          if value._is_map then 
-                 for k,v in pairs(value._data) do
-                     write(tag)
-                     local inner_length = 2
-                     if value.is_scalar_key then
-                        inner_length = inner_length +  map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
-                     else 
-                        inner_length = inner_length +  k:ByteSize()
-                     end
-                     if value.is_scalar_value then
-                        inner_length = inner_length + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
-                     else 
-                        inner_length = inner_length +  v:ByteSize()
-                     end
-                     EncodeVarint(write, inner_length)
-                     if value.is_scalar_key then
-                        map_encoder.TYPE_TO_ENCODER[value:key_type()](k) 
-                     else 
-                        k:_InternalSerialize(write)
-                     end
-                     if value.is_scalar_value then
-                        map_encoder.TYPE_TO_ENCODER[value:value_type()](v) 
-                     else 
-                        v:_InternalSerialize(write)
-                     end
-                 end
-             
-            else 
-                for _, element in ipairs(value) do
-                    write(tag)
-                    EncodeVarint(write, element:ByteSize())
-                    element:_InternalSerialize(write)
-                end
-            end
-        end
-    else
-        return function (write, value)
-            write(tag)
-            EncodeVarint(write, value:ByteSize())
-            return value:_InternalSerialize(write)
-        end
-    end
+    error("map key and value filed Can not be map")
 end
 
 TYPE_TO_MAP_ENCODER = {
