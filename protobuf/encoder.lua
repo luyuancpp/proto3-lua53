@@ -500,12 +500,12 @@ function MessageEncoder(field_number, is_repeated, is_packed)
                      end
                      EncodeVarint(write, inner_length)
                      if value.is_scalar_key then
-                        map_encoder.TYPE_TO_MAP_ENCODER[value:key_type()](k) 
+                        map_encoder.TYPE_TO_MAP_ENCODER[value:key_type()](field_number, is_repeated, is_packed)(write, k) 
                      else 
                         k:_InternalSerialize(write)
                      end
                      if value.is_scalar_value then
-                        map_encoder.TYPE_TO_MAP_ENCODER[value:value_type()](v) 
+                        map_encoder.TYPE_TO_MAP_ENCODER[value:key_type()](field_number, is_repeated, is_packed)(write, v)
                      else 
                         v:_InternalSerialize(write)
                      end
