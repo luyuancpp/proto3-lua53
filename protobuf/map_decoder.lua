@@ -170,7 +170,7 @@ function BytesMapDecoder(field_number, is_repeated, is_packed, key, new_default)
     end
 end
 
-function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
+function MessageMapDecoder(field_number, is_repeated, is_packed, key, new_default)
     local DecodeVarint = _DecodeVarint
     local sub = string.sub
     local is_map = key["is_map"]
@@ -264,5 +264,28 @@ function _FieldSkipper()
 end
 
 SkipField = _FieldSkipper()
+
+
+
+TYPE_TO_MAP_DECODER = {
+    [FieldDescriptor.TYPE_DOUBLE] = DoubleMapDecoder,
+    [FieldDescriptor.TYPE_FLOAT] = FloatMapDecoder,
+    [FieldDescriptor.TYPE_INT64] = Int64MapDecoder,
+    [FieldDescriptor.TYPE_UINT64] = UInt64MapDecoder,
+    [FieldDescriptor.TYPE_INT32] = Int32MapDecoder,
+    [FieldDescriptor.TYPE_FIXED64] = Fixed64MapDecoder,
+    [FieldDescriptor.TYPE_FIXED32] = Fixed32MapDecoder,
+    [FieldDescriptor.TYPE_BOOL] = BoolMapDecoder,
+    [FieldDescriptor.TYPE_STRING] = StringMapDecoder,
+    [FieldDescriptor.TYPE_GROUP] = GroupMapDecoder,
+    [FieldDescriptor.TYPE_MESSAGE] = MessageMapDecoder,
+    [FieldDescriptor.TYPE_BYTES] = BytesMapDecoder,
+    [FieldDescriptor.TYPE_UINT32] = UInt32MapDecoder,
+    [FieldDescriptor.TYPE_ENUM] = EnumMapDecoder,
+    [FieldDescriptor.TYPE_SFIXED32] = SFixed32MapDecoder,
+    [FieldDescriptor.TYPE_SFIXED64] = SFixed64MapDecoder,
+    [FieldDescriptor.TYPE_SINT32] = SInt32MapDecoder,
+    [FieldDescriptor.TYPE_SINT64] = SInt64MapDecoder
+}
 
 return map_decoder
