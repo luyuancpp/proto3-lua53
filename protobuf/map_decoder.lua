@@ -31,8 +31,8 @@ local encoder = require "encoder"
 local wire_format = require "wire_format"
 
 local base = _ENV
-local decoder = {}
-local _ENV = decoder
+local map_decoder = {}
+local _ENV = map_decoder
 
 local _DecodeVarint = pb.varint_decoder
 local _DecodeSignedVarint = pb.signed_varint_decoder
@@ -42,77 +42,41 @@ local _DecodeSignedVarint32 = pb.signed_varint_decoder
 
 ReadTag = pb.read_tag
 
-local function _SimpleDecoder(wire_type, decode_value)
+local function _SimpleMapDecoder(wire_type, decode_value)
     return function(field_number, is_repeated, is_packed, key, new_default)
-        if is_packed then
-            local DecodeVarint = _DecodeVarint
-            return function (buffer, pos, pend, message, field_dict)
-                local value = field_dict[key]
-                if value == nil then
-                    value = new_default(message)
-                    field_dict[key] = value
-                end
-                local endpoint
-                endpoint, pos = DecodeVarint(buffer, pos)
-                endpoint = endpoint + pos
-                if endpoint > pend then
-                    error('Truncated message.')
-                end
-                local element
-                while pos < endpoint do
-                    element, pos = decode_value(buffer, pos)
-                    value[#value + 1] = element
-                end
-                if pos > endpoint then
-                    value:remove(#value)
-                    error('Packed element was truncated.')
-                end
-                return pos
+        local tag_bytes = encoder.TagBytes(field_number, wire_type)
+        local tag_len = #tag_bytes
+        local sub = string.sub
+        return function(buffer, pos, pend, message, field_dict)
+            local value = field_dict[key]
+            if value == nil then
+                value = new_default(message)
+                field_dict[key] = value
             end
-        elseif is_repeated then
-            local tag_bytes = encoder.TagBytes(field_number, wire_type)
-            local tag_len = #tag_bytes
-            local sub = string.sub
-            return function(buffer, pos, pend, message, field_dict)
-                local value = field_dict[key]
-                if value == nil then
-                    value = new_default(message)
-                    field_dict[key] = value
-                end
-                while 1 do
-                    local element, new_pos = decode_value(buffer, pos)
-                    value:append(element)
-                    pos = new_pos + tag_len
-                    if sub(buffer, new_pos+1, pos) ~= tag_bytes or new_pos >= pend then
-                        if new_pos > pend then
-                            error('Truncated message.')
-                        end
-                        return new_pos
+            while 1 do
+                local element, new_pos = decode_value(buffer, pos)
+                value:append(element)
+                pos = new_pos + tag_len
+                if sub(buffer, new_pos+1, pos) ~= tag_bytes or new_pos >= pend then
+                    if new_pos > pend then
+                        error('Truncated message.')
                     end
+                    return new_pos
                 end
-            end
-        else
-            return function (buffer, pos, pend, message, field_dict)
-                field_dict[key], pos = decode_value(buffer, pos)
-                if pos > pend then
-                    field_dict[key] = nil
-                    error('Truncated message.')
-                end
-                return pos
             end
         end
     end
 end
 
-local function _ModifiedDecoder(wire_type, decode_value, modify_value)
+local function _ModifiedMapDecoder(wire_type, decode_value, modify_value)
     local InnerDecode = function (buffer, pos)
         local result, new_pos = decode_value(buffer, pos)
         return modify_value(result), new_pos
     end
-    return _SimpleDecoder(wire_type, InnerDecode)
+    return _SimpleMapDecoder(wire_type, InnerDecode)
 end
 
-local function _StructPackDecoder(wire_type, value_size, format)
+local function _StructPackMapDecoder(wire_type, value_size, format)
     local struct_unpack = pb.struct_unpack
 
     function InnerDecode(buffer, pos)
@@ -120,114 +84,88 @@ local function _StructPackDecoder(wire_type, value_size, format)
         local result = struct_unpack(format, buffer, pos)
         return result, new_pos
     end
-    return _SimpleDecoder(wire_type, InnerDecode)
+    return _SimpleMapDecoder(wire_type, InnerDecode)
 end
 
 local function _Boolean(value)
     return value ~= 0
 end
 
-Int32Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint32)
-EnumDecoder = Int32Decoder
+Int32MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint32)
+EnumMapDecoder = Int32MapDecoder
 
-Int64Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint)
+Int64MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint)
 
-UInt32Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32)
-UInt64Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint)
+UInt32MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32)
+UInt64MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint)
 
-SInt32Decoder = _ModifiedDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32, wire_format.ZigZagDecode32)
-SInt64Decoder = _ModifiedDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint, wire_format.ZigZagDecode64)
+SInt32MapDecoder = _ModifiedMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32, wire_format.ZigZagDecode32)
+SInt64MapDecoder = _ModifiedMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint, wire_format.ZigZagDecode64)
 
-Fixed32Decoder  = _StructPackDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('I'))
-Fixed64Decoder  = _StructPackDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('Q'))
-SFixed32Decoder = _StructPackDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('i'))
-SFixed64Decoder = _StructPackDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('q'))
-FloatDecoder    = _StructPackDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('f'))
-DoubleDecoder   = _StructPackDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('d'))
-
-
-BoolDecoder = _ModifiedDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint, _Boolean)
+Fixed32MapDecoder  = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('I'))
+Fixed64MapDecoder  = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('Q'))
+SFixed32MapDecoder = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('i'))
+SFixed64MapDecoder = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('q'))
+FloatMapDecoder    = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('f'))
+DoubleMapDecoder   = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('d'))
 
 
-function StringDecoder(field_number, is_repeated, is_packed, key, new_default)
+BoolMapDecoder = _ModifiedMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint, _Boolean)
+
+
+function StringMapDecoder(field_number, is_repeated, is_packed, key, new_default)
     local DecodeVarint = _DecodeVarint
     local sub = string.sub
     --    local unicode = unicode
     assert(not is_packed)
-    if is_repeated then
-        local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-        local tag_len = #tag_bytes
-        return function (buffer, pos, pend, message, field_dict)
-            local value = field_dict[key]
-            if value == nil then
-                value = new_default(message)
-                field_dict[key] = value
-            end
-            while 1 do
-                local size, new_pos
-                size, pos = DecodeVarint(buffer, pos)
-                new_pos = pos + size
-                if new_pos > pend then
-                    error('Truncated string.')
-                end
-                value:append(sub(buffer, pos+1, new_pos))
-                pos = new_pos + tag_len
-                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
-                    return new_pos
-                end
-            end
+    local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
+    local tag_len = #tag_bytes
+    return function (buffer, pos, pend, message, field_dict)
+        local value = field_dict[key]
+        if value == nil then
+            value = new_default(message)
+            field_dict[key] = value
         end
-    else
-        return function (buffer, pos, pend, message, field_dict)
+        while 1 do
             local size, new_pos
             size, pos = DecodeVarint(buffer, pos)
             new_pos = pos + size
             if new_pos > pend then
                 error('Truncated string.')
             end
-            field_dict[key] = sub(buffer, pos + 1, new_pos)
-            return new_pos
+            value:append(sub(buffer, pos+1, new_pos))
+            pos = new_pos + tag_len
+            if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
+                return new_pos
+            end
         end
     end
 end
 
-function BytesDecoder(field_number, is_repeated, is_packed, key, new_default)
+function BytesMapDecoder(field_number, is_repeated, is_packed, key, new_default)
     local DecodeVarint = _DecodeVarint
     local sub = string.sub
     assert(not is_packed)
-    if is_repeated then
-        local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-        local tag_len = #tag_bytes
-        return function (buffer, pos, pend, message, field_dict)
-            local value = field_dict[key]
-            if value == nil then
-                value = new_default(message)
-                field_dict[key] = value
-            end
-            while 1 do
-                local size, new_pos
-                size, pos = DecodeVarint(buffer, pos)
-                new_pos = pos + size
-                if new_pos > pend then
-                    error('Truncated string.')
-                end
-                value:append(sub(buffer, pos + 1, new_pos))
-                pos = new_pos + tag_len
-                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
-                    return new_pos
-                end
-            end
+    local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
+    local tag_len = #tag_bytes
+    return function (buffer, pos, pend, message, field_dict)
+        local value = field_dict[key]
+        if value == nil then
+            value = new_default(message)
+            field_dict[key] = value
         end
-    else
-        return function(buffer, pos, pend, message, field_dict)
+        while 1 do
             local size, new_pos
             size, pos = DecodeVarint(buffer, pos)
             new_pos = pos + size
             if new_pos > pend then
                 error('Truncated string.')
             end
-            field_dict[key] = sub(buffer, pos + 1, new_pos)
-            return new_pos
+            value:append(sub(buffer, pos + 1, new_pos))
+            pos = new_pos + tag_len
+            if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
+                return new_pos
+            end
         end
     end
 end
@@ -238,76 +176,31 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
     local is_map = key["is_map"]
 
     assert(not is_packed)
-    if is_repeated then
-    	if is_map == true then
-    		local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-	        local tag_len = #tag_bytes
-	        return function (buffer, pos, pend, message, field_dict)
-	            local value = field_dict[key]
-	            if value == nil then
-	                value = new_default(message)
-	                field_dict[key] = value
-	            end
-	            while 1 do
-	                local size, new_pos
-	                size, pos = DecodeVarint(buffer, pos)
-	                new_pos = pos + size
-	                if new_pos > pend then
-	                    error('Truncated message.')
-	                end
-	                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
-	                    error('Unexpected end-group tag.')
-	                end
-	                pos = new_pos + tag_len
-	                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
-	                    return new_pos
-	                end
-	            end
-	        end
-    	else
-    		local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
-	        local tag_len = #tag_bytes
-	        return function (buffer, pos, pend, message, field_dict)
-	            local value = field_dict[key]
-	            if value == nil then
-	                value = new_default(message)
-	                field_dict[key] = value
-	            end
-	            while 1 do
-	                local size, new_pos
-	                size, pos = DecodeVarint(buffer, pos)
-	                new_pos = pos + size
-	                if new_pos > pend then
-	                    error('Truncated message.')
-	                end
-	                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
-	                    error('Unexpected end-group tag.')
-	                end
-	                pos = new_pos + tag_len
-	                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
-	                    return new_pos
-	                end
-	            end
-	        end
-    	end
-	        
-    else
+
+	if is_map == true then
+		local tag_bytes = encoder.TagBytes(field_number, wire_format.WIRETYPE_LENGTH_DELIMITED)
+        local tag_len = #tag_bytes
         return function (buffer, pos, pend, message, field_dict)
             local value = field_dict[key]
             if value == nil then
                 value = new_default(message)
                 field_dict[key] = value
             end
-            local size, new_pos
-            size, pos = DecodeVarint(buffer, pos)
-            new_pos = pos + size
-            if new_pos > pend then
-                error('Truncated message.')
+            while 1 do
+                local size, new_pos
+                size, pos = DecodeVarint(buffer, pos)
+                new_pos = pos + size
+                if new_pos > pend then
+                    error('Truncated message.')
+                end
+                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
+                    error('Unexpected end-group tag.')
+                end
+                pos = new_pos + tag_len
+                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
+                    return new_pos
+                end
             end
-            if value:_InternalParse(buffer, pos, new_pos) ~= new_pos then
-                error('Unexpected end-group tag.')
-            end
-            return new_pos
         end
     end
 end
@@ -372,4 +265,4 @@ end
 
 SkipField = _FieldSkipper()
 
-return decoder
+return map_decoder
