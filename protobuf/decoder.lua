@@ -29,6 +29,7 @@ local print = print
 local pb = require "pb"
 local encoder = require "encoder"
 local wire_format = require "wire_format"
+local map_decoder = require "map_decoder"
 
 local base = _ENV
 local decoder = {}
@@ -249,6 +250,12 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                field_dict[key] = value
 	            end
 	            while 1 do
+                        if value:is_scalar_key() then
+                             pos = map_decoder.TYPE_TO_MAP_DECODER[value:key_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
+                        end
+                        if value:is_scalar_value() then
+                             pos = map_decoder.TYPE_TO_MAP_DECODER[value:value_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
+                        end
 	                local size, new_pos
 	                size, pos = DecodeVarint(buffer, pos)
 	                new_pos = pos + size
