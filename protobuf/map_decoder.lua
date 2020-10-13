@@ -30,6 +30,10 @@ local pb = require "pb"
 local encoder = require "encoder"
 local wire_format = require "wire_format"
 
+local descriptor = require "descriptor"
+local FieldDescriptor = descriptor.FieldDescriptor
+
+
 local base = _ENV
 local map_decoder = {}
 local _ENV = map_decoder
