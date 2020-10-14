@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message Proto3Empty {}
+
+message Proto3Message{}
+
+message Proto3MessageWithMaps {
+
+  map<bool, bool> field_map_bool_bool_1 = 1;
+
+ 
+
+}
