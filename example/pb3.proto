@@ -8,6 +8,37 @@ message Proto3MessageWithMaps {
 
   map<bool, bool> field_map_bool_bool_1 = 1;
 
- 
+  map<int32, float> field_map_int32_float_58 = 58;
 
+  map<int32, int32> field_map_int32_int32_59 = 59;
+
+  map<int32, int64> field_map_int32_int64_60 = 60;
+
+  map<int32, Proto3Message> field_map_int32_message_61 = 61;
+
+  map<int64, int64> field_map_int64_int64_77 = 77;
+
+  map<int64, Proto3Message> field_map_int64_message_78 = 78;
+
+  map<uint32, int32> field_map_uint32_int32_178 = 178;
+
+  map<uint32, int64> field_map_uint32_int64_179 = 179;
+
+  map<uint32, Proto3Message> field_map_uint32_message_180 = 180;
+
+  map<uint32, uint32> field_map_uint32_uint32_186 = 186;
+
+  map<uint32, uint64> field_map_uint32_uint64_187 = 187;
+
+  
+
+  map<uint64, int32> field_map_uint64_int32_195 = 195;
+
+  map<uint64, int64> field_map_uint64_int64_196 = 196;
+
+  map<uint64, Proto3Message> field_map_uint64_message_197 = 197;
+
+  map<uint64, uint32> field_map_uint64_uint32_203 = 203;
+
+  map<uint64, uint64> field_map_uint64_uint64_204 = 204;
 }
