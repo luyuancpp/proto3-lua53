@@ -35,13 +35,13 @@ local _ENV = containers
 
 local function _IsSameCppType(map_field_type, param )
     if "number" == type(param) then
-        if map_filed_type == FieldDescriptor.CPPTYPE_INT32 or 
-           map_filed_type == FieldDescriptor.CPPTYPE_INT64 or 
-           map_filed_type == FieldDescriptor.CPPTYPE_UINT32 or 
-           map_filed_type == FieldDescriptor.CPPTYPE_UINT64 or 
-           map_filed_type == FieldDescriptor.CPPTYPE_DOUBLE or 
-           map_filed_type == FieldDescriptor.CPPTYPE_FLOAT or
-           map_filed_type == FieldDescriptor.CPPTYPE_ENUM then
+        if map_field_type == FieldDescriptor.CPPTYPE_INT32 or 
+           map_field_type == FieldDescriptor.CPPTYPE_INT64 or 
+           map_field_type == FieldDescriptor.CPPTYPE_UINT32 or 
+           map_field_type == FieldDescriptor.CPPTYPE_UINT64 or 
+           map_field_type == FieldDescriptor.CPPTYPE_DOUBLE or 
+           map_field_type == FieldDescriptor.CPPTYPE_FLOAT or
+           map_field_type == FieldDescriptor.CPPTYPE_ENUM then
            return true
        end
    elseif "boolean" == type(param) then
