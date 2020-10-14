@@ -249,10 +249,10 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                value = new_default(message)
 	                field_dict[key] = value
 	            end
-                    pos = pos - 1
+                    pos = pos - tag_len 
 	            while 1 do
-                        pos = pos + 1
-	                local size = 0
+                        local size
+                        pos = pos + tag_len
 	                size, pos = DecodeVarint(buffer, pos)
 	                if pos > pend then
 	                    error('Truncated message.')
@@ -276,8 +276,8 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                     error('Unexpected end-group tag.')
 	                  end
                         end
-	                if  pos == pend then
-	                    return pos 
+	                if  sub(buffer, pos + 1, pos + tag_len) ~= tag_bytes or pos == pend then
+	                    return  pos
 	                end
 	            end
 	        end
