@@ -52,22 +52,13 @@ local function _SimpleMapDecoder(wire_type, decode_value)
         local tag_len = #tag_bytes
         local sub = string.sub
         return function(buffer, pos, pend, message, field_dict)
-            local value = field_dict[key]
-            if value == nil then
-                value = new_default(message)
-                field_dict[key] = value
-            end
-            while 1 do
                 local element, new_pos = decode_value(buffer, pos)
-                value:append(element)
-                pos = new_pos + tag_len
                 if sub(buffer, new_pos+1, pos) ~= tag_bytes or new_pos >= pend then
                     if new_pos > pend then
                         error('Truncated message.')
                     end
-                    return new_pos
+                    return element, new_pos
                 end
-            end
         end
     end
 end

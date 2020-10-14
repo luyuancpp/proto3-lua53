@@ -250,24 +250,36 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                field_dict[key] = value
 	            end
 	            while 1 do
-                        if value:is_scalar_key() then
-                             pos = map_decoder.TYPE_TO_MAP_DECODER[value:key_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
-                        end
-                        if value:is_scalar_value() then
-                             pos = map_decoder.TYPE_TO_MAP_DECODER[value:value_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
-                        end
-	                local size, new_pos
+	                local size = 0
 	                size, pos = DecodeVarint(buffer, pos)
-	                new_pos = pos + size
-	                if new_pos > pend then
+	                if pos > pend then
 	                    error('Truncated message.')
 	                end
-	                if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
-	                    error('Unexpected end-group tag.')
+                        local k, v
+                        if value:is_scalar_key() then
+	                     size, pos = DecodeVarint(buffer, pos)
+                             k, pos = map_decoder.TYPE_TO_MAP_DECODER[value:key_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
+                        end
+                        if value:is_scalar_value() then
+	                     size, pos = DecodeVarint(buffer, pos)
+                             v, pos = map_decoder.TYPE_TO_MAP_DECODER[value:value_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
+                        end
+	                if pos > pend then
+	                    error('Truncated message.')
 	                end
-	                pos = new_pos + tag_len
-	                if sub(buffer, new_pos + 1, pos) ~= tag_bytes or new_pos == pend then
-	                    return new_pos
+                        if value:is_scalar_key() and value:is_scalar_value() then
+	                   value:insert(k, v)
+                           print("-------------------")
+                           print(k)
+                           print(v)
+                           print("-------------------")
+                        else
+	                  if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
+	                     error('Unexpected end-group tag.')
+	                  end
+                        end
+	                if  pos == pend then
+	                    return pos
 	                end
 	            end
 	        end
