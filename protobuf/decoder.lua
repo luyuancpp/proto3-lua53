@@ -249,7 +249,9 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                value = new_default(message)
 	                field_dict[key] = value
 	            end
+                    pos = pos - 1
 	            while 1 do
+                        pos = pos + 1
 	                local size = 0
 	                size, pos = DecodeVarint(buffer, pos)
 	                if pos > pend then
@@ -269,17 +271,13 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                end
                         if value:is_scalar_key() and value:is_scalar_value() then
 	                   value:insert(k, v)
-                           print("-------------------")
-                           print(k)
-                           print(v)
-                           print("-------------------")
                         else
 	                  if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
 	                     error('Unexpected end-group tag.')
 	                  end
                         end
 	                if  pos == pend then
-	                    return pos
+	                    return pos 
 	                end
 	            end
 	        end
