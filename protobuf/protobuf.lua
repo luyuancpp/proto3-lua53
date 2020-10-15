@@ -308,11 +308,11 @@ local function _DefaultValueConstructorForField(field , message_meta)
         if field.cpp_type == FieldDescriptor.CPPTYPE_MESSAGE then
             local message_type = field.message_type
             rawset(message_type,"is_map", field["is_map"]) 
-            rawset(message_type,"key_cpp_type", field["key_cpp_type"]) 
-            rawset(message_type,"value_cpp_type", field["value_cpp_type"]) 
-            rawset(message_type,"key_type", field["key_type"]) 
-            rawset(message_type,"value_type", field["value_type"]) 
             if field["is_map"] == true then
+                rawset(message_type,"key_cpp_type", field["key_cpp_type"]) 
+                rawset(message_type,"value_cpp_type", field["value_cpp_type"]) 
+                rawset(message_type,"key_type", field["key_type"]) 
+                rawset(message_type,"value_type", field["value_type"]) 
                 return function (message)
                     return containers.RepeatedMapCompositeFieldContainer(message._listener_for_children, message_type)
                 end
