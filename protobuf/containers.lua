@@ -167,6 +167,10 @@ local _RMFC_meta = {
     value_type = function(self)
         return self._value_type
     end,
+    new_value = function(self)
+        local value = self._concrete_class()
+        return value
+    end,
     __newindex = function(self, key, value)
         error("RepeatedCompositeFieldContainer Can't set value directly")
     end
@@ -184,7 +188,8 @@ function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
         _key_type = message_descriptor["key_type"],  
         _value_type = message_descriptor["value_type"],
         _count = 0,
-        _data = {}
+        _data = {},
+        _concrete_class = message_descriptor["concrete_class"]
     }
     return setmetatable(o, _RMFC_meta)
 end

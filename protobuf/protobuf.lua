@@ -43,6 +43,7 @@ local containers = require "containers"
 local descriptor = require "descriptor"
 local FieldDescriptor = descriptor.FieldDescriptor
 local text_format = require "text_format"
+local prettyprint = require "prettyprint"
 
 local base = _ENV
 local protobuf = {}
@@ -282,6 +283,13 @@ local function _AddMapProperties(message_descriptor)
             rawset(message_descriptor, "is_map", true)
             rawset(message_descriptor, "value_cpp_type", v.cpp_type)
             rawset(message_descriptor, "value_type", v.type)
+                 --print("---------------")
+                 if nil ~= v.message_type then
+                     rawset(message_descriptor, "value_concrete_class", v.message_type._concrete_class)
+                     --print(v.message_type._concrete_class)
+                     --print(message_descriptor["value_concrete_class"])
+                 end
+                 --print("---------------")
             is_map = true
         end
     end
@@ -313,6 +321,8 @@ local function _DefaultValueConstructorForField(field , message_meta)
                 rawset(message_type,"value_cpp_type", field["value_cpp_type"]) 
                 rawset(message_type,"key_type", field["key_type"]) 
                 rawset(message_type,"value_type", field["value_type"]) 
+                rawset(message_type, "value_concrete_class", field["value_concrete_class"])
+                --print(field["value_concrete_class"])
                 return function (message)
                     return containers.RepeatedMapCompositeFieldContainer(message._listener_for_children, message_type)
                 end

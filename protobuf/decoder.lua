@@ -261,10 +261,14 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
                         if value:is_scalar_key() then
 	                     size, pos = DecodeVarint(buffer, pos)
                              k, pos = map_decoder.TYPE_TO_MAP_DECODER[value:key_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
+                        else
+	                    error('value can not be table .')
                         end
                         if value:is_scalar_value() then
 	                     size, pos = DecodeVarint(buffer, pos)
                              v, pos = map_decoder.TYPE_TO_MAP_DECODER[value:value_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
+                        else
+                            newv =  vale:new_value() 
                         end
 	                if pos > pend then
 	                    error('Truncated message.')
@@ -272,9 +276,6 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
                         if value:is_scalar_key() and value:is_scalar_value() then
 	                   value:insert(k, v)
                         else
-	                  if value:add():_InternalParse(buffer, pos, new_pos) ~= new_pos then
-	                     error('Unexpected end-group tag.')
-	                  end
                         end
 	                if  sub(buffer, pos + 1, pos + tag_len) ~= tag_bytes or pos == pend then
 	                    return  pos
