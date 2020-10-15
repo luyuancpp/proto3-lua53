@@ -168,7 +168,7 @@ local _RMFC_meta = {
         return self._value_type
     end,
     new_value = function(self)
-        local value = self._concrete_class()
+        local value = self._value_concrete_class()
         return value
     end,
     __newindex = function(self, key, value)
@@ -179,6 +179,9 @@ local _RMFC_meta = {
 _RMFC_meta.__index = _RMFC_meta
 
 function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
+    if message_descriptor["concrete_class"] then
+      print("lll")
+    end
     local o = {
         _listener = listener,
         _message_descriptor = message_descriptor,
@@ -189,7 +192,7 @@ function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
         _value_type = message_descriptor["value_type"],
         _count = 0,
         _data = {},
-        _concrete_class = message_descriptor["concrete_class"]
+        _value_concrete_class = message_descriptor["value_concrete_class"]
     }
     return setmetatable(o, _RMFC_meta)
 end

@@ -268,7 +268,7 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                     size, pos = DecodeVarint(buffer, pos)
                              v, pos = map_decoder.TYPE_TO_MAP_DECODER[value:value_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
                         else
-                            newv =  vale:new_value() 
+                            newv =  value:new_value() 
                         end
 	                if pos > pend then
 	                    error('Truncated message.')

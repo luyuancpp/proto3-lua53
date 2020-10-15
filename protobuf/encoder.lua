@@ -218,12 +218,12 @@ function MessageSizer(field_number, is_repeated, is_packed)
                  local result = tag_size * value._count
                  for k,v in pairs(value._data) do
                      local inner_length = 2
-                     if value.is_scalar_key then
+                     if value:is_scalar_key() then
                         inner_length = inner_length +  map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
                      else 
                         inner_length = inner_length +  k:ByteSize()
                      end
-                     if value.is_scalar_value then
+                     if value:is_scalar_value() then
                         inner_length = inner_length + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
                      else 
                         inner_length = inner_length +  v:ByteSize()
@@ -488,24 +488,24 @@ function MessageEncoder(field_number, is_repeated, is_packed)
                  for k,v in pairs(value._data) do
                      write(tag)
                      local inner_length = 2
-                     if value.is_scalar_key then
+                     if value:is_scalar_key() then
                         inner_length = inner_length +  map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:key_type()](k) 
                      else 
                         inner_length = inner_length +  k:ByteSize()
                      end
-                     if value.is_scalar_value then
+                     if value:is_scalar_value() then
                         inner_length = inner_length + map_encoder.EN_CODER_TYPE_TO_MAP_SIZER[value:value_type()](v) 
                      else 
                         inner_length = inner_length +  v:ByteSize()
                      end
                      EncodeVarint(write, inner_length)
-                     if value.is_scalar_key then
-                        map_encoder.TYPE_TO_MAP_ENCODER[value:value_type()](field_number, is_repeated, is_packed)(write, k) 
+                     if value:is_scalar_key() then
+                        map_encoder.TYPE_TO_MAP_ENCODER[value:key_type()](field_number, is_repeated, is_packed)(write, k) 
                      else 
                         k:_InternalSerialize(write)
                      end
-                     if value.is_scalar_value then
-                        map_encoder.TYPE_TO_MAP_ENCODER[value:key_type()](field_number, is_repeated, is_packed)(write, v)
+                     if value:is_scalar_value() then
+                        map_encoder.TYPE_TO_MAP_ENCODER[value:value_type()](field_number, is_repeated, is_packed)(write, v)
                      else 
                         v:_InternalSerialize(write)
                      end
