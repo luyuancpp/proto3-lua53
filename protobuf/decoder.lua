@@ -251,8 +251,8 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	            end
                     pos = pos - tag_len 
 	            while 1 do
-                        local size
-                        pos = pos + tag_len
+                    local size
+                    pos = pos + tag_len
 	                size, pos = DecodeVarint(buffer, pos)
 	                if pos > pend then
 	                    error('Truncated message.')
