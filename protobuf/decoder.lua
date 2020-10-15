@@ -254,6 +254,7 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
                     local size
                     pos = pos + tag_len
 	                size, pos = DecodeVarint(buffer, pos)
+                     field_end_pos = pos + size
 	                if pos > pend then
 	                    error('Truncated message.')
 	                end
@@ -268,15 +269,13 @@ function MessageDecoder(field_number, is_repeated, is_packed, key, new_default)
 	                     size, pos = DecodeVarint(buffer, pos)
                              v, pos = map_decoder.TYPE_TO_MAP_DECODER[value:value_type()](field_number, is_repeated, is_packed)(buffer, pos, pend, message, field_dict)
                         else
-                            newv =  value:new_value() 
+                            v =  value:new_value() 
+	                    pos = v:_InternalParse(buffer, pos, field_end_pos)
                         end
 	                if pos > pend then
 	                    error('Truncated message.')
 	                end
-                        if value:is_scalar_key() and value:is_scalar_value() then
-	                   value:insert(k, v)
-                        else
-                        end
+	                value:insert(k, v)
 	                if  sub(buffer, pos + 1, pos + tag_len) ~= tag_bytes or pos == pend then
 	                    return  pos
 	                end

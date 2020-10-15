@@ -31,3 +31,7 @@ print(msg:ByteSize())
 for i = 1 , 10 do 
    print(msg.field_map_int32_int32_59:get(i))
 end
+
+
+
+print(msg.field_map_int32_message_61:get(1).field_int32_5)
