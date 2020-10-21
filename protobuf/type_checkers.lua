@@ -22,6 +22,7 @@ package.cpath = package.cpath .. ';../protobuf/?.so'
 local type = type
 local error = error
 local string = string
+local print = print 
 
 
 local base = _ENV
@@ -81,7 +82,7 @@ end
 
 function Int64ValueChecker()
     local _MIN = -562949953421312
-    local _MAX = 562949953421312
+    local _MAX = 4611686018427387903 
     return function(proposed_value)
         if type(proposed_value) ~= 'number' then
             error(string.format('%s has type %s, but expected one of: number',
@@ -95,7 +96,7 @@ end
 
 function Uint64ValueChecker(IntValueChecker)
     local _MIN = 0
-    local _MAX = 1125899906842624
+    local _MAX = 4611686018427387903 -- (2 << 61) - 1 
 
     return function(proposed_value)
         if type(proposed_value) ~= 'number' then
