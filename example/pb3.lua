@@ -5,32 +5,32 @@ local print = print
 local pb3_pb = require 'pb3_pb'
 local prettyprint = require 'prettyprint'
 
-local person = pb3_pb.Proto3MessageWithMaps()
+local p3mwm = pb3_pb.Proto3MessageWithMaps()
 local p3m = pb3_pb.Proto3Message()
 p3m.field_int32_5 = 5 
 
-person.field_map_bool_bool_1:insert(false, false)
-person.field_map_bool_bool_1:insert(true, false)
+p3mwm.field_map_bool_bool_1:insert(false, false)
+p3mwm.field_map_bool_bool_1:insert(true, false)
 
 for i = 1 , 10 do 
-   person.field_map_int32_int32_59:insert(i,i)
+   p3mwm.field_map_int32_int32_59:insert(i,i)
 end
 
-person.field_map_int32_message_61:insert(1, p3m)
+p3mwm.field_map_int32_message_61:insert(1, p3m)
 
 
-local data = person:SerializeToString()
-local msg = pb3_pb.Proto3MessageWithMaps()
-msg:ParseFromString(data)
+local data = p3mwm:SerializeToString()
+local p3mwmss = pb3_pb.Proto3MessageWithMaps()
+p3mwmss:ParseFromString(data)
 
-print(msg:ByteSize())
+print(p3mwmss:ByteSize())
 
-assert(msg:ByteSize() == person:ByteSize(), "pb sizer error")
+assert(p3mwmss:ByteSize() == p3mwm:ByteSize(), "pb sizer error")
 
 for i = 1 , 10 do 
-   print(msg.field_map_int32_int32_59:get(i))
+   print(p3mwmss.field_map_int32_int32_59:get(i))
 end
 
 
 
-print(msg.field_map_int32_message_61:get(1).field_int32_5)
+print(p3mwmss.field_map_int32_message_61:get(1).field_int32_5)
