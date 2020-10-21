@@ -196,7 +196,7 @@ function _StructPackMapEncoder(wire_type, value_size, format)
     end
 end
 
-Int32MapEncoder = _SimpleMapEncoder(wire_format.WIRETYPE_VARINT, _EncodeSignedVarint, _SignedVarintSize)
+Int32MapEncoder = _SimpleMapEncoder(wire_format.WIRETYPE_VARINT, _EncodeSignedVarint, _SignedMapVarintSize)
 Int64MapEncoder = Int32MapEncoder
 EnumMapEncoder = Int32MapEncoder
 
