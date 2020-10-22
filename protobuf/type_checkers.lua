@@ -96,7 +96,7 @@ end
 
 function Uint64ValueChecker(IntValueChecker)
     local _MIN = 0
-    local _MAX = 4611686018427387903 -- (2 << 61) - 1 
+    local _MAX = 9223372036854775807 
 
     return function(proposed_value)
         if type(proposed_value) ~= 'number' then
