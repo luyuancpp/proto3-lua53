@@ -50,9 +50,8 @@ local data = p3mwm:SerializeToString()
 local p3mwmss = pb3_pb.Proto3MessageWithMaps()
 p3mwmss:ParseFromString(data)
 
-print(p3mwmss:ByteSize())
 
-assert(p3mwmss:ByteSize() == p3mwm:ByteSize(), "pb sizer error")
+testassert(p3mwmss:ByteSize(), p3mwm:ByteSize())
 
 for i = 1 , 10 do 
    print(p3mwmss.field_map_int32_int32_59:get(i))
