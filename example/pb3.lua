@@ -9,7 +9,11 @@ local prettyprint = require 'prettyprint'
 function testassert(a, b)
   if a == b then
      print("same")
+  else 
+    print(a)
+    print(b)
   end
+  
   assert(a == b, "error")
 end
 
@@ -29,7 +33,7 @@ print(string.format("%.u", p3mss.field_uint64_4))
 
 testassert(p3m.field_uint64_4, p3mss.field_uint64_4)
 testassert(p3m.field_uint64_4, p3mss.field_uint64_4)
-testassert(p3m.field_double_1, p3mss.ield_double_1)
+testassert(p3m.field_double_1, p3mss.field_double_1)
 
 
 p3mwm.field_map_bool_bool_1:insert(false, false)
