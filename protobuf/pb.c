@@ -123,7 +123,7 @@ static int varint_encoder64(lua_State *L)
 {
     lua_Integer l_value = luaL_checkinteger(L, 2);
     uint64_t value = (uint64_t)l_value;
-    printf("s  %lu\n", value);
+    //printf("s  %lu\n", value);
 
     luaL_Buffer b;
     luaL_buffinit(L, &b);
@@ -140,6 +140,27 @@ static int varint_encoder64(lua_State *L)
 static int signed_varint_encoder(lua_State *L)
 {
     lua_Number l_value = luaL_checknumber(L, 2);
+    int64_t value = (int64_t)l_value;
+    
+    luaL_Buffer b;
+    luaL_buffinit(L, &b);
+
+    if (value < 0)
+    {
+        pack_varint(&b, *(uint64_t*)&value);
+    }else{
+        pack_varint(&b, value);
+    }
+    
+    lua_settop(L, 1);
+    luaL_pushresult(&b);
+    lua_call(L, 1, 0);
+    return 0;
+}
+
+static int signed_varint_encoder64(lua_State *L)
+{
+    lua_Integer l_value = luaL_checkinteger(L, 2);
     int64_t value = (int64_t)l_value;
     
     luaL_Buffer b;
@@ -299,6 +320,23 @@ static int signed_varint_decoder(lua_State *L)
         luaL_error(L, "error data %s, len:%d", buffer, len);
     }else{
         lua_pushnumber(L, (lua_Number)(int64_t)unpack_varint(buffer, len));
+        lua_pushinteger(L, len + pos);
+    }
+    return 2;
+}
+
+static int signed_varint_decoder64(lua_State *L)
+{
+    size_t len;
+    const char* buffer = luaL_checklstring(L, 1, &len);
+    size_t pos = luaL_checkinteger(L, 2);
+    buffer += pos;
+    len = size_varint(buffer, len);
+    
+    if(len == -1){
+        luaL_error(L, "error data %s, len:%d", buffer, len);
+    }else{
+        lua_pushinteger(L, (lua_Integer)(int64_t)unpack_varint(buffer, len));
         lua_pushinteger(L, len + pos);
     }
     return 2;
@@ -481,12 +519,14 @@ static const struct luaL_reg _pb [] = {
     {"varint_encoder", varint_encoder},
     {"varint_encoder64", varint_encoder64},
     {"signed_varint_encoder", signed_varint_encoder},
+    {"signed_varint_encoder64", signed_varint_encoder64},
     {"read_tag", read_tag},
     {"struct_pack", struct_pack},
     {"struct_unpack", struct_unpack},
     {"varint_decoder", varint_decoder},
     {"varint_decoder64", varint_decoder64},
     {"signed_varint_decoder", signed_varint_decoder},
+    {"signed_varint_decoder64", signed_varint_decoder64},
     {"zig_zag_decode32", zig_zag_decode32},
     {"zig_zag_encode32", zig_zag_encode32},
     {"zig_zag_decode64", zig_zag_decode64},
