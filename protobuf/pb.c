@@ -105,7 +105,8 @@ static void pack_varint(luaL_Buffer *b, uint64_t value)
 
 static int varint_encoder(lua_State *L)
 {
-    lua_Number l_value = luaL_checknumber(L, 2);
+    //lua_Number l_value = luaL_checknumber(L, 2);
+    lua_Integer l_value = luaL_checkinteger(L, 2);
     uint64_t value = (uint64_t)l_value;
 
     luaL_Buffer b;
@@ -285,7 +286,8 @@ static int varint_decoder(lua_State *L)
     if(len == -1){
         luaL_error(L, "error data %s, len:%d", buffer, len);
     }else{
-        lua_pushnumber(L, (lua_Number)unpack_varint(buffer, len));
+        //lua_pushnumber(L, (lua_Number)unpack_varint(buffer, len));
+        lua_pushinteger(L, (lua_Integer)unpack_varint(buffer, len));
         lua_pushinteger(L, len + pos);
     }
     return 2;
