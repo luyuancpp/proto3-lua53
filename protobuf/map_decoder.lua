@@ -44,6 +44,9 @@ local _DecodeSignedVarint = pb.signed_varint_decoder
 local _DecodeVarint32 = pb.varint_decoder
 local _DecodeSignedVarint32 = pb.signed_varint_decoder
 
+local _DecodeVarint64 = pb.varint_decoder64
+local _DecodeSignedVarint64 = pb.signed_varint_decoder64
+
 ReadTag = pb.read_tag
 
 local function _SimpleMapDecoder(wire_type, decode_value)
@@ -89,13 +92,13 @@ end
 Int32MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint32)
 EnumMapDecoder = Int32MapDecoder
 
-Int64MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint)
+Int64MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint64)
 
 UInt32MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32)
-UInt64MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint)
+UInt64MapDecoder = _SimpleMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint64)
 
 SInt32MapDecoder = _ModifiedMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32, wire_format.ZigZagDecode32)
-SInt64MapDecoder = _ModifiedMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint, wire_format.ZigZagDecode64)
+SInt64MapDecoder = _ModifiedMapDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint64, wire_format.ZigZagDecode64)
 
 Fixed32MapDecoder  = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('I'))
 Fixed64MapDecoder  = _StructPackMapDecoder(wire_format.WIRETYPE_FIXED64, 8, string.byte('Q'))

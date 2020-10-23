@@ -149,8 +149,9 @@ end
 --  Encoders!
 
 local _EncodeVarint = pb.varint_encoder
+local _EncodeVarint64 = pb.varint_encoder64
 local _EncodeSignedVarint = pb.signed_varint_encoder
-
+local _EncodeSignedVarint64 = pb.signed_varint_encoder64
 
 function _VarintMapBytes(value)
     local out = {}
@@ -197,18 +198,18 @@ function _StructPackMapEncoder(wire_type, value_size, format)
 end
 
 Int32MapEncoder = _SimpleMapEncoder(wire_format.WIRETYPE_VARINT, _EncodeSignedVarint, _SignedMapVarintSize)
-Int64MapEncoder = Int32MapEncoder
+Int64MapEncoder = _SimpleMapEncoder(wire_format.WIRETYPE_VARINT, _EncodeSignedVarint64, _SignedMapVarintSize)
 EnumMapEncoder = Int32MapEncoder
 
 UInt32MapEncoder = _SimpleMapEncoder(wire_format.WIRETYPE_VARINT, _EncodeVarint, _VarintSize)
-UInt64MapEncoder = UInt32MapEncoder
+UInt64MapEncoder = _SimpleMapEncoder(wire_format.WIRETYPE_VARINT, _EncodeVarint64, _VarintSize)
 
 SInt32MapEncoder = _ModifiedMapEncoder(
     wire_format.WIRETYPE_VARINT, _EncodeVarint, _VarintSize,
     wire_format.ZigZagEncode32)
 
 SInt64MapEncoder = _ModifiedMapEncoder(
-    wire_format.WIRETYPE_VARINT, _EncodeVarint, _VarintSize,
+    wire_format.WIRETYPE_VARINT, _EncodeVarint64, _VarintSize,
     wire_format.ZigZagEncode64)
 
 Fixed32MapEncoder  = _StructPackMapEncoder(wire_format.WIRETYPE_FIXED32, 4, string.byte('I'))
