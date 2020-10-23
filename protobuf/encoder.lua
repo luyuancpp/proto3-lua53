@@ -253,6 +253,7 @@ end
 --  Encoders!
 
 local _EncodeVarint = pb.varint_encoder
+local _EncodeVarint64 = pb.varint_encoder64
 local _EncodeSignedVarint = pb.signed_varint_encoder
 
 
@@ -374,7 +375,7 @@ Int64Encoder = Int32Encoder
 EnumEncoder = Int32Encoder
 
 UInt32Encoder = _SimpleEncoder(wire_format.WIRETYPE_VARINT, _EncodeVarint, _VarintSize)
-UInt64Encoder = UInt32Encoder
+UInt64Encoder = _SimpleEncoder(wire_format.WIRETYPE_VARINT, _EncodeVarint64, _VarintSize)
 
 SInt32Encoder = _ModifiedEncoder(
     wire_format.WIRETYPE_VARINT, _EncodeVarint, _VarintSize,

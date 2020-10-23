@@ -119,6 +119,24 @@ static int varint_encoder(lua_State *L)
     return 0;
 }
 
+static int varint_encoder64(lua_State *L)
+{
+    lua_Integer l_value = luaL_checkinteger(L, 2);
+    uint64_t value = (uint64_t)l_value;
+    printf("s  %lu\n", value);
+
+    luaL_Buffer b;
+    luaL_buffinit(L, &b);
+    
+    pack_varint(&b, value);
+
+    lua_settop(L, 1);
+    luaL_pushresult(&b);
+    lua_call(L, 1, 0);
+    return 0;
+}
+
+
 static int signed_varint_encoder(lua_State *L)
 {
     lua_Number l_value = luaL_checknumber(L, 2);
@@ -444,6 +462,7 @@ static int iostring_clear(lua_State* L)
 
 static const struct luaL_reg _pb [] = {
     {"varint_encoder", varint_encoder},
+    {"varint_encoder64", varint_encoder64},
     {"signed_varint_encoder", signed_varint_encoder},
     {"read_tag", read_tag},
     {"struct_pack", struct_pack},
