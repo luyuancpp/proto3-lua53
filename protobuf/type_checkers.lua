@@ -81,8 +81,8 @@ end
 
 
 function Int64ValueChecker()
-    local _MIN = -562949953421312
-    local _MAX = 4611686018427387903 
+    local _MIN = -2305843009213693952
+    local _MAX = 2305843009213693952 -- 2 << 61 
     return function(proposed_value)
         if type(proposed_value) ~= 'number' then
             error(string.format('%s has type %s, but expected one of: number',
@@ -96,7 +96,7 @@ end
 
 function Uint64ValueChecker(IntValueChecker)
     local _MIN = 0
-    local _MAX = 9223372036854775807 
+    local _MAX = 9223372036854775808  -- 2 << 62
 
     return function(proposed_value)
         if type(proposed_value) ~= 'number' then
