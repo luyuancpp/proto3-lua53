@@ -41,6 +41,8 @@ local _DecodeSignedVarint = pb.signed_varint_decoder
 local _DecodeVarint32 = pb.varint_decoder
 local _DecodeSignedVarint32 = pb.signed_varint_decoder
 
+local _DecodeVarint64 = pb.varint_decoder64
+
 ReadTag = pb.read_tag
 
 local function _SimpleDecoder(wire_type, decode_value)
@@ -131,10 +133,10 @@ end
 Int32Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint32)
 EnumDecoder = Int32Decoder
 
-Int64Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeSignedVarint)
+Int64Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint64)
 
 UInt32Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32)
-UInt64Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint)
+UInt64Decoder = _SimpleDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint64)
 
 SInt32Decoder = _ModifiedDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint32, wire_format.ZigZagDecode32)
 SInt64Decoder = _ModifiedDecoder(wire_format.WIRETYPE_VARINT, _DecodeVarint, wire_format.ZigZagDecode64)

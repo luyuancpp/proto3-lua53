@@ -270,6 +270,23 @@ static int varint_decoder(lua_State *L)
     return 2;
 }
 
+static int varint_decoder64(lua_State *L)
+{
+    size_t len;
+    const char* buffer = luaL_checklstring(L, 1, &len);
+    size_t pos = luaL_checkinteger(L, 2);
+    
+    buffer += pos;
+    len = size_varint(buffer, len);
+    if(len == -1){
+        luaL_error(L, "error data %s, len:%d", buffer, len);
+    }else{
+        lua_pushinteger(L, (lua_Integer)unpack_varint(buffer, len));
+        lua_pushinteger(L, len + pos);
+    }
+    return 2;
+}
+
 static int signed_varint_decoder(lua_State *L)
 {
     size_t len;
@@ -468,6 +485,7 @@ static const struct luaL_reg _pb [] = {
     {"struct_pack", struct_pack},
     {"struct_unpack", struct_unpack},
     {"varint_decoder", varint_decoder},
+    {"varint_decoder64", varint_decoder64},
     {"signed_varint_decoder", signed_varint_decoder},
     {"zig_zag_decode32", zig_zag_decode32},
     {"zig_zag_encode32", zig_zag_encode32},
