@@ -45,18 +45,14 @@ end
 
 p3mwm.field_map_int32_message_61:insert(1, p3m)
 
-
 local data = p3mwm:SerializeToString()
 local p3mwmss = pb3_pb.Proto3MessageWithMaps()
 p3mwmss:ParseFromString(data)
-
 
 testassert(p3mwmss:ByteSize(), p3mwm:ByteSize())
 
 for i = 1 , 10 do 
    print(p3mwmss.field_map_int32_int32_59:get(i))
 end
-
-
 
 print(p3mwmss.field_map_int32_message_61:get(1).field_int32_5)
