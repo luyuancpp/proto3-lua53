@@ -179,9 +179,6 @@ local _RMFC_meta = {
 _RMFC_meta.__index = _RMFC_meta
 
 function RepeatedMapCompositeFieldContainer(listener, message_descriptor)
-    if message_descriptor["concrete_class"] then
-      print("lll")
-    end
     local o = {
         _listener = listener,
         _message_descriptor = message_descriptor,
